@@ -1,0 +1,51 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env
+.env
+.env.local
+.env.*
+
+# Spring Boot
+backend/target/
+backend/build/
+backend/.gradle/
+backend/.idea/
+
+# Config
+# Ignore all Spring config files
+backend/src/main/resources/application*.yml
+
+# BUT allow the example template
+!backend/src/main/resources/application-example.yml
+
+# Logs
+*.log
+
+# Expo / React Native
+mobile/node_modules/
+mobile/.expo/
+mobile/.expo-shared/
+mobile/dist/
+mobile/web-build/
+mobile/.idea/
+
+# Env files
+mobile/.env
+mobile/.env.local
+
+# iOS / Android native (if generated later)
+mobile/ios/
+mobile/android/
+
