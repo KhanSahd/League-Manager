@@ -3,6 +3,9 @@ package com.sahdkhan.leaguemanager.league;
 import jakarta.persistence.*;
 import java.util.UUID;
 
+/**
+ * Represents a sports league with a unique identifier, name, and sport type.
+ */
 @Entity
 public class League {
 

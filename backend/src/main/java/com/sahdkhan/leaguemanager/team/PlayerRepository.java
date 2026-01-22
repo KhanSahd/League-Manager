@@ -6,5 +6,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface PlayerRepository extends JpaRepository<Player, UUID> {
-    List<Player> findByTeam(Team team);
+    List<Player> findByTeam( Team team );
 }

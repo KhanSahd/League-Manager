@@ -7,6 +7,7 @@ import { Input } from "../src/ui/Input";
 import { Button } from "../src/ui/Button";
 import { theme } from "../src/ui/theme";
 import { EmptyState } from "../src/ui/EmptyState";
+import SportIcon from "../src/ui/SportIcon";
 
 export default function Leagues() {
 
@@ -60,20 +61,23 @@ export default function Leagues() {
               onPress={() => {
                 router.push({
                   pathname: "/teams",
-                  params: { leagueId: item.id, leagueName: item.name }
+                  params: { leagueId: item.id, leagueName: item.name, role: item.role }
                 })
               }}
             >
               <Card>
-                <Text
-                  style={{
-                    fontSize: theme.textSize.md,
-                    color: theme.colors.text,
-                    fontWeight: "500",
-                  }}
-              >
-                  {item.name}
-                </Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: theme.spacing.sm }}>
+                  <SportIcon sport={item.sport} />
+                  <Text
+                    style={{
+                      fontSize: theme.textSize.md,
+                      color: theme.colors.text,
+                      fontWeight: "500",
+                    }}
+                  >
+                    {item.name}
+                  </Text>
+                </View>
                 <Text
                   style={{
                     fontSize: theme.textSize.sm,

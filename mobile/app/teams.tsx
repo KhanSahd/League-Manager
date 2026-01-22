@@ -68,7 +68,7 @@ export default function Teams() {
               onPress={() =>
                 router.push({
                   pathname: "/roster",
-                  params: { teamId: item.id, teamName: item.name },
+                  params: { teamId: item.id, teamName: item.name, leagueId: leagueId },
                 })
               }
             >

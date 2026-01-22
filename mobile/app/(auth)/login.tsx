@@ -3,6 +3,10 @@ import { View, Text, TextInput, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "../../src/auth/AuthContext";
 import { theme } from "../../src/ui/theme";
+import { Input } from "../../src/ui/Input";
+import { Button } from "../../src/ui/Button";
+import { BASE_URL } from "../../src/api/client";
+import { api } from "../../src/api/client";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -15,16 +19,12 @@ export default function Login() {
   async function submit() {
     setError(null);
     try {
-      const res = await fetch("http://10.0.0.54:8080/api/auth/login", {
+      const res = await api<{ token: string }>("/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-
-      if (!res.ok) throw new Error("Invalid login");
-
-      const data = await res.json();
-      await signIn(data.token);
+      await signIn(res.token);
       router.replace("/home");
     } catch (e: any) {
       setError(e.message);
@@ -34,11 +34,11 @@ export default function Login() {
   return (
     <View
       style={{
-              flex: 1,
-              padding: theme.spacing.lg,
-              backgroundColor: theme.colors.bg,
-              gap: theme.spacing.md,
-            }}
+        flex: 1,
+        paddingHorizontal: theme.spacing.lg,
+        paddingBottom: theme.spacing.lg,
+        gap: theme.spacing.md,
+      }}
     >
       <Text
         style={{
@@ -58,23 +58,24 @@ export default function Login() {
           {error}
         </Text>}
 
-      <TextInput
+      <Input
         placeholder="Email"
         autoCapitalize="none"
         value={email}
         onChangeText={setEmail}
       />
 
-      <TextInput
+      <Input
         placeholder="Password"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
       />
 
-      <Pressable onPress={submit}>
+      {/* <Pressable onPress={submit}>
         <Text>Login</Text>
-      </Pressable>
+      </Pressable> */}
+      <Button onPress={submit} label="Login" />
     </View>
   );
 }

@@ -53,4 +53,30 @@ public class TeamController {
                 .map(p -> new PlayerResponse(p.getId(), p.getName()))
                 .toList();
     }
+
+    /**
+     * Remove a player from a team.
+     * @param teamId - the ID of the team
+     * @param playerId - the ID of the player to be removed
+     */
+    @DeleteMapping("/{teamId}/players/{playerId}")
+    public void removePlayer(
+            @PathVariable UUID teamId,
+            @PathVariable UUID playerId
+    )
+    {
+        teams.deletePlayer(playerId);
+    }
+
+    /**
+     * Remove a team.
+     * @param teamId - the ID of the team to be removed
+     */
+    @DeleteMapping("/{teamId}")
+    public void removeTeam(
+            @PathVariable UUID teamId
+    )
+    {
+        teams.deleteTeam(teamId);
+    }
 }

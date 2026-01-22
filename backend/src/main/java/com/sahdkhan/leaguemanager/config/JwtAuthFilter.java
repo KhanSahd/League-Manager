@@ -17,6 +17,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Filter that processes JWT authentication for incoming HTTP requests.
+ * It extracts the JWT from the Authorization header, validates it, and sets
+ * the authentication in the security context if valid.
+ */
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
@@ -26,6 +31,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         this.jwtService = jwtService;
     }
 
+    /**
+     * Filters incoming requests to authenticate using JWT.
+     *
+     * @param request     the HTTP request
+     * @param response    the HTTP response
+     * @param filterChain the filter chain
+     * @throws ServletException in case of a servlet error
+     * @throws IOException      in case of an I/O error
+     */
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,

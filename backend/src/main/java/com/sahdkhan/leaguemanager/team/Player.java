@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 
 import java.util.UUID;
 
+/**
+ * Entity representing a Player in a Team.
+ */
 @Entity
 public class Player {
 

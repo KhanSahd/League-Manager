@@ -7,13 +7,16 @@ import { Input } from "../src/ui/Input";
 import { Card } from "../src/ui/Card";
 import { emptyTextStyle, theme } from "../src/ui/theme";
 import { EmptyState } from "../src/ui/EmptyState";
+import Entypo from "@expo/vector-icons/Entypo";
+import { League } from "../src/api/league";
 
 export default function Roster() {
-  const { teamId, teamName } = useLocalSearchParams();
+  const { teamId, teamName, role } = useLocalSearchParams();
   const [players, setPlayers] = useState<Player[]>([]);
   const [name, setName] = useState("");
   const [fetching, setFetching] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [canDelete, setCanDelete] = useState( role != "MEMBER" );
 
   async function load() {
     setFetching(true);
@@ -62,15 +65,25 @@ export default function Roster() {
           contentContainerStyle={{ gap: theme.spacing.sm }}
           renderItem={({ item }) => (
             <Card>
-              <Text
-                style={{
-                  fontSize: theme.textSize.md,
-                  color: theme.colors.text,
-                  fontWeight: "500",
-                }}
-              >
-                {item.name}
-              </Text>
+              <View style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                backgroundColor: theme.colors.muted,
+                padding: theme.spacing.md,
+                borderRadius: theme.radius.sm,
+              }}>
+                <Text
+                  style={{
+                    fontSize: theme.textSize.md,
+                    color: theme.colors.text,
+                    fontWeight: "500",
+                  }}
+                >
+                  {item.name}
+                </Text>
+                { canDelete && <Entypo name="trash" size={24} color="black" /> }
+              </View>
             </Card>
           )}
         />
