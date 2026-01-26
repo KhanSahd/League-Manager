@@ -1,4 +1,4 @@
-import { View, Text, FlatList, Alert } from "react-native";
+import { View, Text, FlatList, Alert, TouchableOpacity } from "react-native";
 import { useEffect, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { addPlayer, getPlayers, Player, removePlayer } from "../src/api/teams";
@@ -9,14 +9,18 @@ import { emptyTextStyle, theme } from "../src/ui/theme";
 import { EmptyState } from "../src/ui/EmptyState";
 import Entypo from "@expo/vector-icons/Entypo";
 import { League } from "../src/api/league";
+import { confirm } from "../src/ui/Helper";
 
 export default function Roster() {
   const { teamId, teamName, role } = useLocalSearchParams();
+  const canDelete = role != "MEMBER";
   const [players, setPlayers] = useState<Player[]>([]);
   const [name, setName] = useState("");
   const [fetching, setFetching] = useState(true);
   const [creating, setCreating] = useState(false);
-  const canDelete = role != "MEMBER";
+  const [inEditMode, setInEditMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
 
   async function load() {
     setFetching(true);
@@ -41,7 +45,22 @@ export default function Roster() {
     catch (error) {
       Alert.alert("Failed to remove player: " + error);
     }
-    await load();
+  }
+
+  /**
+   * Add a player ID to the selected IDs list.
+   * @param playerId the ID of the player to add.
+   */
+  function addToSelectedIds(playerId: string) {
+    setSelectedIds(ids => [...ids, playerId]);
+  }
+
+  /**
+   * Remove a player ID from the selected IDs list.
+   * @param playerId the ID of the player to remove.
+   */
+  function removeFromSelectedIds(playerId: string) {
+    setSelectedIds(ids => ids.filter(id => id !== playerId));
   }
 
   useEffect(() => {
@@ -58,15 +77,24 @@ export default function Roster() {
       }}
     >
       {/* Screen title */}
-      <Text
-        style={{
-          fontSize: theme.textSize.xl,
-          color: theme.colors.text,
-          fontWeight: "600",
-        }}
-      >
-        {teamName}
-      </Text>
+      <View style={{
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}>
+        <Text
+          style={{
+            fontSize: theme.textSize.xl,
+            color: theme.colors.text,
+            fontWeight: "600",
+          }}
+        >
+          {teamName}
+        </Text>
+        { canDelete && <Entypo name="edit" size={24} color={theme.colors.text}
+          onPress={() => setInEditMode(!inEditMode)}
+        /> }
+      </View>
       {fetching ? null : players.length === 0 ? (
         <EmptyState message="No players added yet." />
       ) : (
@@ -84,6 +112,24 @@ export default function Roster() {
                 // padding: theme.spacing.md,
                 // borderRadius: theme.radius.sm,
               }}>
+                {inEditMode && canDelete && (
+                  <TouchableOpacity style={{
+                    borderRadius: "100%",
+                    backgroundColor: selectedIds.includes(item.id) ? "green" : "transparent",
+                    borderWidth: 1,
+                    borderColor: theme.colors.border,
+                    padding: 10,
+                  }}
+                  onPress={() => {
+                    if (selectedIds.includes(item.id)) {
+                      removeFromSelectedIds(item.id);
+                    } else {
+                      addToSelectedIds(item.id);
+                    }
+                  }}
+                  >
+                  </TouchableOpacity>  
+                )}
                 <Text
                   style={{
                     fontSize: theme.textSize.md,
@@ -95,11 +141,6 @@ export default function Roster() {
                 >
                   {item.name}
                 </Text>
-                {canDelete &&
-                  <Entypo name="trash" size={24} color="black"
-                    onPress={() => deletePlayer(item.id)}
-                  />
-                }
               </View>
             </Card>
           )}
@@ -108,7 +149,7 @@ export default function Roster() {
       )}
 
       {/* Add player (secondary action) */}
-      {fetching == false && (
+      {!fetching && !inEditMode ? (
         <Card>
           <Text
             style={{
@@ -131,6 +172,27 @@ export default function Roster() {
 
           <Button label="Add Player" onPress={submit} />
         </Card>
+      ) : (
+        inEditMode && canDelete && (
+          <Button
+            label={`Remove Selected Players (${selectedIds.length})`}
+            variant="danger"
+            onPress={async () => {
+              const shouldDelete = await confirm(
+                `Are you sure you want to remove ${selectedIds.length} player(s)?`
+              );
+              if (!shouldDelete) return;
+
+              for (const playerId of selectedIds) {
+                await deletePlayer(playerId);
+              }
+
+              setSelectedIds([]);
+              setInEditMode(false);
+              await load();
+            }}
+          />
+        )
       )}
     </View>
   );

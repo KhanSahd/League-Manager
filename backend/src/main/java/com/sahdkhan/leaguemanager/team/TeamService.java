@@ -81,12 +81,17 @@ public class TeamService {
     }
 
     /**
-     * Deletes a player from a team using the ID of the team and the players ID.
-     *
-     * @param playerId the ID of the player to delete
+     * Deletes a player from the specified team.
+     * @param teamId the ID of the team
+     * @param playerId the ID of the player to be deleted
      */
-    public void deletePlayer(UUID playerId) {
+    public void deletePlayer(UUID teamId, UUID playerId) {
+        Team team = teams.findById( teamId ).orElseThrow();
         Player player = players.findById(playerId).orElseThrow();
+        if (!player.getTeam().equals( team ))
+        {
+            throw new IllegalArgumentException( "Player does not belong to the specified team" );
+        }
         players.delete( player );
     }
 

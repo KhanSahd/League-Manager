@@ -65,7 +65,7 @@ public class TeamController {
             @PathVariable UUID playerId
     )
     {
-        teams.deletePlayer(playerId);
+        teams.deletePlayer(teamId, playerId);
     }
 
     /**
