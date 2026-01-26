@@ -1,7 +1,7 @@
-import { View, Text, FlatList } from "react-native";
+import { View, Text, FlatList, Alert } from "react-native";
 import { useEffect, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
-import { addPlayer, getPlayers, Player } from "../src/api/teams";
+import { addPlayer, getPlayers, Player, removePlayer } from "../src/api/teams";
 import { Button } from "../src/ui/Button";
 import { Input } from "../src/ui/Input";
 import { Card } from "../src/ui/Card";
@@ -16,7 +16,7 @@ export default function Roster() {
   const [name, setName] = useState("");
   const [fetching, setFetching] = useState(true);
   const [creating, setCreating] = useState(false);
-  const [canDelete, setCanDelete] = useState( role != "MEMBER" );
+  const canDelete = role != "MEMBER";
 
   async function load() {
     setFetching(true);
@@ -31,6 +31,17 @@ export default function Roster() {
     setName("");
     await load();
     setCreating(false);
+  }
+
+  async function deletePlayer(playerId: string) {
+    if (!playerId) return;
+    try {
+      await removePlayer(teamId as string, playerId as string);
+    }
+    catch (error) {
+      Alert.alert("Failed to remove player: " + error);
+    }
+    await load();
   }
 
   useEffect(() => {
@@ -69,20 +80,26 @@ export default function Roster() {
                 flexDirection: "row",
                 justifyContent: "space-between",
                 alignItems: "center",
-                backgroundColor: theme.colors.muted,
-                padding: theme.spacing.md,
-                borderRadius: theme.radius.sm,
+                // backgroundColor: theme.colors.muted,
+                // padding: theme.spacing.md,
+                // borderRadius: theme.radius.sm,
               }}>
                 <Text
                   style={{
                     fontSize: theme.textSize.md,
                     color: theme.colors.text,
                     fontWeight: "500",
+                    flex: 1,
+                    textAlign: "center"
                   }}
                 >
                   {item.name}
                 </Text>
-                { canDelete && <Entypo name="trash" size={24} color="black" /> }
+                {canDelete &&
+                  <Entypo name="trash" size={24} color="black"
+                    onPress={() => deletePlayer(item.id)}
+                  />
+                }
               </View>
             </Card>
           )}

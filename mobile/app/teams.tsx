@@ -1,21 +1,23 @@
 import { View, Text, FlatList, Pressable, TextInput } from "react-native";
 import { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { createTeam, getTeams, Team } from "../src/api/teams";
+import { createTeam, deleteTeam, getTeams, Team } from "../src/api/teams";
 import { Card } from "../src/ui/Card";
 import { emptyTextStyle, theme } from "../src/ui/theme";
 import { Input } from "../src/ui/Input";
 import { Button } from "../src/ui/Button";
 import { EmptyState } from "../src/ui/EmptyState";
+import Entypo from "@expo/vector-icons/Entypo";
 
 export default function Teams() {
-  const { leagueId, leagueName } = useLocalSearchParams();
+  const { leagueId, leagueName, role } = useLocalSearchParams();
   const router = useRouter();
 
   const [teams, setTeams] = useState<Team[]>([]);
   const [name, setName] = useState("");
   const [fetching, setFetching] = useState(true);
   const [creating, setCreating] = useState(false);
+  const canDelete = role != "MEMBER";
 
   async function load() {
     setFetching(true);
@@ -31,6 +33,12 @@ export default function Teams() {
     setName("");
     await load();
     setCreating(false);
+  }
+
+  async function removeTeam(teamId: string) {
+    if (!teamId) return;
+    await deleteTeam(teamId as string);
+    await load();
   }
 
   useEffect(() => {
@@ -68,20 +76,29 @@ export default function Teams() {
               onPress={() =>
                 router.push({
                   pathname: "/roster",
-                  params: { teamId: item.id, teamName: item.name, leagueId: leagueId },
+                  params: { teamId: item.id, teamName: item.name, role: role },
                 })
               }
             >
               <Card>
-                <Text
-                  style={{
-                    fontSize: theme.textSize.md,
-                    color: theme.colors.text,
-                    fontWeight: "500",
-                  }}
-                >
-                  {item.name}
-                </Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: theme.spacing.sm }}>
+                  <Text
+                    style={{
+                      fontSize: theme.textSize.md,
+                      color: theme.colors.text,
+                      fontWeight: "500",
+                      flex: 1,
+                    }}
+                  >
+                    {item.name}
+                  </Text>
+                  {canDelete &&
+                    <Entypo name="trash" size={24} color="black"
+                      onPress={() => removeTeam(item.id)}
+                    />
+                  }
+                  
+                </View>
               </Card>
             </Pressable>
           )}

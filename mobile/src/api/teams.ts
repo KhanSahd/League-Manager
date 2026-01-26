@@ -71,3 +71,14 @@ export async function removePlayer(teamId: string, playerId: string): Promise<vo
     method: "DELETE",
   });
 }
+
+/**
+ * Delete a team.
+ * @param teamId - The ID of the team.
+ * @returns A promise that resolves when the team is deleted.
+ */
+export async function deleteTeam(teamId: string): Promise<void> {
+  return api<void>(`/teams/${teamId}`, {
+    method: "DELETE",
+  });
+}
