@@ -1,5 +1,7 @@
 package com.sahdkhan.leaguemanager.team;
 
+import com.sahdkhan.leaguemanager.user.User;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,9 +25,10 @@ public class TeamController {
     @PostMapping("/league/{leagueId}")
     public TeamResponse createTeam(
             @PathVariable UUID leagueId,
-            @RequestBody CreateTeamRequest req
+            @RequestBody CreateTeamRequest req,
+            @AuthenticationPrincipal User user
     ) {
-        Team team = teams.createTeam(leagueId, req.name());
+        Team team = teams.createTeam(leagueId, req.name(), user);
         return new TeamResponse(team.getId(), team.getName());
     }
 
@@ -40,9 +43,10 @@ public class TeamController {
     @PostMapping("/{teamId}/players")
     public PlayerResponse addPlayer(
             @PathVariable UUID teamId,
-            @RequestBody CreatePlayerRequest req
+            @RequestBody CreatePlayerRequest req,
+            @AuthenticationPrincipal User user
     ) {
-        Player p = teams.addPlayer(teamId, req.name());
+        Player p = teams.addPlayer(teamId, req.name(), user);
         return new PlayerResponse(p.getId(), p.getName());
     }
 
@@ -62,10 +66,11 @@ public class TeamController {
     @DeleteMapping("/{teamId}/players/{playerId}")
     public void removePlayer(
             @PathVariable UUID teamId,
-            @PathVariable UUID playerId
+            @PathVariable UUID playerId,
+            @AuthenticationPrincipal User user
     )
     {
-        teams.deletePlayer(teamId, playerId);
+        teams.deletePlayer(teamId, playerId, user);
     }
 
     /**
@@ -74,9 +79,10 @@ public class TeamController {
      */
     @DeleteMapping("/{teamId}")
     public void removeTeam(
-            @PathVariable UUID teamId
+            @PathVariable UUID teamId,
+            @AuthenticationPrincipal User user
     )
     {
-        teams.deleteTeam(teamId);
+        teams.deleteTeam(teamId, user);
     }
 }
