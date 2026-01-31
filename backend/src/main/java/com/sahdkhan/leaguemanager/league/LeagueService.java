@@ -87,8 +87,9 @@ public class LeagueService
      * @param sport    the new sport of the league
      * @return the updated league
      */
-    public League updateLeague( UUID leagueId, String name, String sport, User user )
+    public League updateLeague( UUID leagueId, String name, String sport, UUID userId )
     {
+        User user = users.findById( userId ).orElseThrow();
         League league = leagues.findById( leagueId ).orElseThrow();
         requireAdmin( league, user );
         league.setName( name );

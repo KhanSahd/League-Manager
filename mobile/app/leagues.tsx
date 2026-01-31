@@ -1,6 +1,6 @@
-import { View, Text, Pressable, FlatList, TextInput } from "react-native";
+import { View, Text, Pressable, FlatList, TextInput, Modal } from "react-native";
 import { useEffect, useState } from "react";
-import { createLeague, getMyLeagues, League } from "../src/api/league";
+import { createLeague, getMyLeagues, League, updateLeague } from "../src/api/league";
 import { useRouter } from "expo-router";
 import { Card } from "../src/ui/Card";
 import { Input } from "../src/ui/Input";
@@ -19,6 +19,7 @@ export default function Leagues() {
   const [sport, setSport] = useState("");
   const [fetching, setFetching] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [selectedLeague, setSelectedLeague] = useState<League | null>(null);
 
   async function load() {
     setFetching(true);
@@ -31,10 +32,26 @@ export default function Leagues() {
     if (!name || !sport) return;
     setCreating(true);
     await createLeague(name, sport);
-    setName("");
-    setSport("");
+    clearValues();
     await load();
     setCreating(false);
+  }
+
+  async function updateLeagueInfo(leagueId: string, name: string, sport: string) {
+    if (!leagueId || !name || !sport) return;
+    await updateLeague(leagueId, name, sport);
+    await load();
+  }
+
+  function setValuesFromLeague(league: League) {
+    setName(league.name);
+    setSport(league.sport);
+  }
+
+  function clearValues() {
+    setName("");
+    setSport("");
+    setSelectedLeague(null);
   }
 
   useEffect(() => {
@@ -96,7 +113,9 @@ export default function Leagues() {
                   </View>
                   {/* RIGHT SIDE OF THE CARD. HAS THE  */}
                   { (item.role === "OWNER" || item.role === "ADMIN") && (
-                    <Entypo name="edit" size={24} color={theme.colors.text} />
+                    <Entypo name="edit" size={24} color={theme.colors.text} onPress={() => (
+                      setSelectedLeague(item), setValuesFromLeague(item)
+                    )} />
                   )}
                 </View>
               </Card>
@@ -136,6 +155,41 @@ export default function Leagues() {
         </Card>
         
       )}
+
+      <Modal visible={selectedLeague !== null} animationType="slide" transparent={true}>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <View style={{ width: '90%', backgroundColor: theme.colors.bg, padding: theme.spacing.lg, borderRadius: 8 }}>
+            <Text style={{ fontSize: theme.textSize.md, color: theme.colors.text, fontWeight: "500", marginBottom: theme.spacing.sm }}>
+              Edit League
+            </Text>
+            <Input
+              placeholder="League name"
+              value={name}
+              onChangeText={setName}
+            />
+            <Input
+              placeholder="Sport"
+              value={sport}
+              onChangeText={setSport}
+            />
+            <View style={{ height: theme.spacing.md }} />
+            <Button
+              label="Update League"
+              onPress={async () => {
+                if (selectedLeague) {
+                  await updateLeagueInfo(selectedLeague.id, name, sport);
+                  clearValues();
+                }
+              }}
+            />
+            <View style={{ height: theme.spacing.md }} />
+            <Button
+              label="Cancel"
+              onPress={() => clearValues()}
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

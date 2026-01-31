@@ -64,10 +64,10 @@ public class LeagueController {
     public LeagueResponse update(
             @RequestBody UpdateLeagueRequest req,
             @PathVariable UUID leagueId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal AuthPrincipal principal
     )
     {
-        leagues.updateLeague( leagueId, req.name(), req.sport(), user );
+        leagues.updateLeague( leagueId, req.name(), req.sport(), principal.userId());
         League league = leagues.getLeagueById( leagueId );
         return new LeagueResponse(
                 league.getId(),

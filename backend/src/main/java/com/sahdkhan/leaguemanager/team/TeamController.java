@@ -2,6 +2,7 @@ package com.sahdkhan.leaguemanager.team;
 
 import com.sahdkhan.leaguemanager.user.User;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.sahdkhan.leaguemanager.config.JwtAuthFilter.AuthPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,9 +27,9 @@ public class TeamController {
     public TeamResponse createTeam(
             @PathVariable UUID leagueId,
             @RequestBody CreateTeamRequest req,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal AuthPrincipal principal
     ) {
-        Team team = teams.createTeam(leagueId, req.name(), user);
+        Team team = teams.createTeam(leagueId, req.name(), principal.userId() );
         return new TeamResponse(team.getId(), team.getName());
     }
 
@@ -44,9 +45,9 @@ public class TeamController {
     public PlayerResponse addPlayer(
             @PathVariable UUID teamId,
             @RequestBody CreatePlayerRequest req,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal AuthPrincipal principal
     ) {
-        Player p = teams.addPlayer(teamId, req.name(), user);
+        Player p = teams.addPlayer(teamId, req.name(), principal.userId());
         return new PlayerResponse(p.getId(), p.getName());
     }
 
@@ -67,10 +68,10 @@ public class TeamController {
     public void removePlayer(
             @PathVariable UUID teamId,
             @PathVariable UUID playerId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal AuthPrincipal principal
     )
     {
-        teams.deletePlayer(teamId, playerId, user);
+        teams.deletePlayer(teamId, playerId, principal.userId());
     }
 
     /**
@@ -80,9 +81,9 @@ public class TeamController {
     @DeleteMapping("/{teamId}")
     public void removeTeam(
             @PathVariable UUID teamId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal AuthPrincipal principal
     )
     {
-        teams.deleteTeam(teamId, user);
+        teams.deleteTeam(teamId, principal.userId());
     }
 }

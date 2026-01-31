@@ -3,6 +3,7 @@ package com.sahdkhan.leaguemanager.team;
 import com.sahdkhan.leaguemanager.exceptions.ForbiddenException;
 import com.sahdkhan.leaguemanager.league.*;
 import com.sahdkhan.leaguemanager.user.User;
+import com.sahdkhan.leaguemanager.user.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class TeamService {
     private final PlayerRepository players;
     private final LeagueRepository leagues;
     private final LeagueMemberRepository leagueMembers;
+    private final UserRepository users;
 
     /**
      * Constructs a TeamService with the given repositories.
@@ -30,12 +32,14 @@ public class TeamService {
             TeamRepository teams,
             PlayerRepository players,
             LeagueRepository leagues,
-            LeagueMemberRepository leagueMembers
+            LeagueMemberRepository leagueMembers,
+            UserRepository users
     ) {
         this.teams = teams;
         this.players = players;
         this.leagues = leagues;
         this.leagueMembers = leagueMembers;
+        this.users = users;
     }
 
     private LeagueMember requireMembership(League league, User user) {
@@ -50,6 +54,10 @@ public class TeamService {
         }
     }
 
+    private User getUser( UUID userId ) {
+        return users.findById( userId ).orElseThrow();
+    }
+
 
     /**
      * Creates a new team within the specified league.
@@ -58,8 +66,9 @@ public class TeamService {
      * @param name     the name of the team
      * @return the created team
      */
-    public Team createTeam( UUID leagueId, String name, User user ) {
+    public Team createTeam( UUID leagueId, String name, UUID userId ) {
         League league = leagues.findById(leagueId).orElseThrow();
+        User user = users.findById( userId ).orElseThrow();
         requireAdmin( league, user );
         return teams.save(new Team(name, league));
     }
@@ -82,9 +91,9 @@ public class TeamService {
      * @param name   the name of the player
      * @return the added player
      */
-    public Player addPlayer(UUID teamId, String name, User user) {
+    public Player addPlayer(UUID teamId, String name, UUID userId) {
         Team team = teams.findById(teamId).orElseThrow();
-        requireAdmin( team.getLeague(), user );
+        requireAdmin( team.getLeague(), getUser( userId ) );
         return players.save(new Player(name, team));
     }
 
@@ -104,11 +113,11 @@ public class TeamService {
      * @param teamId the ID of the team
      * @param playerId the ID of the player to be deleted
      */
-    public void deletePlayer(UUID teamId, UUID playerId, User user) {
+    public void deletePlayer(UUID teamId, UUID playerId, UUID userId) {
         Team team = teams.findById( teamId ).orElseThrow();
         Player player = players.findById(playerId).orElseThrow();
-        requireAdmin( team.getLeague(), user );
-        if (!player.getTeam().equals( team ))
+        requireAdmin( team.getLeague(), getUser(userId) );
+        if (!player.getTeam().getId().equals( team.getId() ))
         {
             throw new IllegalArgumentException( "Player does not belong to the specified team" );
         }
@@ -120,10 +129,10 @@ public class TeamService {
      *
      * @param teamId the ID of the team to delete
      */
-    public void deleteTeam(UUID teamId, User user)
+    public void deleteTeam(UUID teamId, UUID userId)
     {
         Team team = teams.findById( teamId ).orElseThrow();
-        requireAdmin( team.getLeague(), user );
+        requireAdmin( team.getLeague(), getUser(userId) );
         teams.delete( team );
     }
 }
