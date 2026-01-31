@@ -17,3 +17,10 @@ export async function createLeague(name: string, sport: string): Promise<League>
     body: JSON.stringify({ name, sport }),
   });
 }
+
+export async function updateLeague(id: string, name: string, sport: string): Promise<League> {
+  return api<League>(`/leagues/${id}`, {
+    method: "PUT",
+    body: JSON.stringify({ name, sport }),
+  });
+}

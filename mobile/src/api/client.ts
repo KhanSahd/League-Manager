@@ -1,6 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 
-const BASE_URL = "http://10.0.0.30:8080/api";
+const BASE_URL = "http://10.0.0.4:8080/api";
 
 async function getToken() {
   return SecureStore.getItemAsync("token");

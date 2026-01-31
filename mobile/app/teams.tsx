@@ -93,11 +93,10 @@ export default function Teams() {
                     {item.name}
                   </Text>
                   {canDelete &&
-                    <Entypo name="trash" size={24} color="black"
+                    <Entypo name="trash" size={24} color={theme.colors.text}
                       onPress={() => removeTeam(item.id)}
                     />
                   }
-                  
                 </View>
               </Card>
             </Pressable>

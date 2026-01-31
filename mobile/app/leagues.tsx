@@ -8,6 +8,7 @@ import { Button } from "../src/ui/Button";
 import { theme } from "../src/ui/theme";
 import { EmptyState } from "../src/ui/EmptyState";
 import SportIcon from "../src/ui/SportIcon";
+import Entypo from "@expo/vector-icons/Entypo";
 
 export default function Leagues() {
 
@@ -66,27 +67,38 @@ export default function Leagues() {
               }}
             >
               <Card>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: theme.spacing.sm }}>
-                  <SportIcon sport={item.sport} />
-                  <Text
-                    style={{
-                      fontSize: theme.textSize.md,
-                      color: theme.colors.text,
-                      fontWeight: "500",
-                    }}
-                  >
-                    {item.name}
-                  </Text>
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                  {/* LEFT SIDE OF THE CARD. */}
+                  <View style={{ flexDirection: "column", gap: theme.spacing.xs, flex: 1 }}>
+                    {/* TOP ROW OF THE LEFT HALF OF THE CARD. CONTAINS THE SPORT ICON AND LEAGUE NAME */}
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: theme.spacing.sm }}>
+                      <SportIcon sport={item.sport} />
+                      <Text
+                        style={{
+                          fontSize: theme.textSize.md,
+                          color: theme.colors.text,
+                          fontWeight: "500",
+                        }}
+                      >
+                        {item.name}
+                      </Text>
+                    </View>
+                    {/* BOTTOM ROW OF THE LEFT HALF OF THE CARD. CONTAINS THE SPORT AND ROLE */}
+                    <Text
+                      style={{
+                        fontSize: theme.textSize.sm,
+                        color: theme.colors.muted,
+                        marginTop: theme.spacing.xs,
+                      }}
+                    >
+                      {item.sport} · {item.role}
+                    </Text>
+                  </View>
+                  {/* RIGHT SIDE OF THE CARD. HAS THE  */}
+                  { (item.role === "OWNER" || item.role === "ADMIN") && (
+                    <Entypo name="edit" size={24} color={theme.colors.text} />
+                  )}
                 </View>
-                <Text
-                  style={{
-                    fontSize: theme.textSize.sm,
-                    color: theme.colors.muted,
-                    marginTop: theme.spacing.xs,
-                  }}
-                >
-                  {item.sport} · {item.role}
-                </Text>
               </Card>
             </Pressable>
           )}

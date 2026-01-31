@@ -29,4 +29,7 @@ public class League {
     public UUID getId() { return id; }
     public String getName() { return name; }
     public String getSport() { return sport; }
+
+    public void setName(String name) { this.name = name; }
+    public void setSport(String sport) { this.sport = sport; }
 }
