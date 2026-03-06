@@ -26,6 +26,7 @@ dependencies {
 
     implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
 
+    implementation 'com.resend:resend-java:+'
 
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly  'io.jsonwebtoken:jjwt-impl:0.12.5'

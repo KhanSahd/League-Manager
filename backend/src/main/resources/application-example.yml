@@ -7,5 +7,9 @@ spring:
 jwt:
   secret: YOUR_SECRET
 
+resend:
+  api:
+    key: YOUR_RESEND_API_KEY
+
 server:
   port: 8080

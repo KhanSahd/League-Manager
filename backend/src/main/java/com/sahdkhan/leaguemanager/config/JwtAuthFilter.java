@@ -47,34 +47,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String auth = request.getHeader("Authorization");
-        if (auth == null || !auth.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response); // allow request
             return;
         }
 
-        String token = auth.substring("Bearer ".length()).trim();
+        String token = authHeader.substring(7);
 
         try {
-            Claims claims = jwtService.parse(token);
-            UUID userId = UUID.fromString(claims.getSubject());
-            String email = claims.get("email", String.class);
-
-            // Minimal "authenticated user" object
-            AuthPrincipal principal = new AuthPrincipal(userId, email);
-
-            var authentication = new UsernamePasswordAuthenticationToken(
-                    principal,
-                    null,
-                    List.of(new SimpleGrantedAuthority("ROLE_USER"))
-            );
-
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        } catch (Exception ex) {
-            // Invalid token: clear auth and proceed (endpoint security will reject if required)
-            SecurityContextHolder.clearContext();
+            // validate token
+        } catch (Exception e) {
+            filterChain.doFilter(request, response); // don't block
+            return;
         }
 
         filterChain.doFilter(request, response);

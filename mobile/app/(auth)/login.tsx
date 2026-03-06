@@ -76,6 +76,16 @@ export default function Login() {
         <Text>Login</Text>
       </Pressable> */}
       <Button onPress={submit} label="Login" />
-    </View>
+      <Button
+        onPress={() => router.push("/register")}
+        label="Don't have an account? Register"
+        variant="secondary"
+      />
+      <Button
+        onPress={() => router.push("/forgot-password")}
+        label="Forgot password?"
+        variant="text"
+      />
+    </View> 
   );
 }

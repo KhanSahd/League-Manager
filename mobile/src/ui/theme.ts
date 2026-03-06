@@ -1,10 +1,11 @@
 export const theme = {
   colors: {
-    bg: "#0F172A",        // slate-900
-    card: "#111827",      // gray-900
+    bg: "#000000",        // slate-900
+    card: "#000000",      // gray-900
     text: "#E5E7EB",      // gray-200
     muted: "#9CA3AF",     // gray-400
-    primary: "#38BDF8",   // sky-400
+    primary: "#29D14E",   // sky-400
+    secondary: "#BC209A", // amber-400
     danger: "#F87171",
     border: "#1F2937",
     error: "#EF4444",
