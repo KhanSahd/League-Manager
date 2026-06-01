@@ -115,7 +115,7 @@ http://localhost:8080
 
 ```bash
 cd mobile
-npm install
+npm ci --legacy-peer-deps #IMPORTANT. PREVENTS DEPENDENCY ISSUES
 ```
 
 ---
