@@ -43,11 +43,11 @@ public class AuthService {
      * @return a JWT token for the newly registered user
      * @throws IllegalArgumentException if the email is already registered
      */
-    public String register(String email, String password) {
+    public String register(String firstName, String lastName, String email, String password) {
         if (users.existsByEmail(email)) {
             throw new IllegalArgumentException("Email already registered");
         }
-        User user = new User(email, encoder.encode(password));
+        User user = new User(firstName, lastName, email, encoder.encode(password));
         users.save(user);
         return jwt.generate(user.getId(), user.getEmail());
     }

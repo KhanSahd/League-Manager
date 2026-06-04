@@ -45,22 +45,36 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain
-    ) throws ServletException, IOException {
+                                   ) throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
-
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response); // allow request
+        String auth = request.getHeader("Authorization");
+        if (auth == null || !auth.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
             return;
         }
 
-        String token = authHeader.substring(7);
+        String token = auth.substring("Bearer ".length()).trim();
 
         try {
-            // validate token
-        } catch (Exception e) {
-            filterChain.doFilter(request, response); // don't block
-            return;
+            Claims claims = jwtService.parse(token);
+            UUID userId = UUID.fromString(claims.getSubject());
+            String email = claims.get("email", String.class);
+
+            // Minimal "authenticated user" object
+            AuthPrincipal principal = new AuthPrincipal(userId, email);
+
+            var authentication = new UsernamePasswordAuthenticationToken(
+                    principal,
+                    null,
+                    List.of(new SimpleGrantedAuthority("ROLE_USER"))
+            );
+
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        } catch (Exception ex) {
+            // Invalid token: clear auth and proceed (endpoint security will reject if required)
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);

@@ -26,7 +26,13 @@ public class AuthController {
     }
 
     /** Data transfer object for authentication requests. */
-    record AuthRequest(@Email String email, @NotBlank String password) {}
+    record AuthLoginRequest(@Email String email, @NotBlank String password) {}
+
+    record AuthRegisterRequest(@NotBlank String firstName,
+                               @NotBlank String lastName,
+                               @Email String email,
+                               @NotBlank String password) {};
+
     /** Data transfer object for authentication responses. */
     record AuthResponse(String token) {}
 
@@ -38,13 +44,19 @@ public class AuthController {
 
     /** Endpoint for user registration. */
     @PostMapping("/register")
-    public AuthResponse register(@RequestBody AuthRequest req) {
-        return new AuthResponse(auth.register(req.email(), req.password()));
+    public AuthResponse register(@RequestBody AuthRegisterRequest req) {
+        String token = auth.register(
+                req.firstName,
+                req.lastName,
+                req.email(),
+                req.password() );
+
+        return new AuthResponse( token );
     }
 
     /** Endpoint for user login. */
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody AuthRequest req) {
+    public AuthResponse login(@RequestBody AuthLoginRequest req) {
         return new AuthResponse(auth.login(req.email(), req.password()));
     }
 }

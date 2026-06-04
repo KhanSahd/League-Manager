@@ -4,6 +4,8 @@ import { useRouter } from 'expo-router'
 import { theme } from '../../src/ui/theme'
 import { Input } from '../../src/ui/Input'
 import { Button } from '../../src/ui/Button'
+import { api } from '../../src/api/client'
+import { useAuth } from '../../src/auth/AuthContext'
 
 const register = () => {
     const [firstName, setFirstName] = useState("")
@@ -14,6 +16,22 @@ const register = () => {
     const [error, setError] = useState<string | null>(null);
 
     const router = useRouter();
+    const { signIn } = useAuth();
+
+    async function submit() {
+        setError(null);
+        try {
+          const res = await api<{ token: string }>("/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ firstName, lastName, email, password }),
+          });
+          await signIn(res.token);
+          router.replace("/home");
+        } catch (e: any) {
+          setError(e.message);
+        }
+      }
 
     return (
     <View
@@ -54,7 +72,7 @@ const register = () => {
 
         <Input placeholder="Confirm Password" secureTextEntry value={confirmedPassword} onChangeText={setConfirmedPassword} />
 
-        <Button onPress={() => console.log("hello")} label="Register" />
+        <Button onPress={submit} label="Register" />
         <Button
         onPress={() => router.push("/login")}
         label="Already have an account? Login"

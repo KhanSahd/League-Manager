@@ -34,12 +34,23 @@ public class User {
      * @param email the user's email address
      * @param passwordHash the hashed password for the user
      */
-    public User(String email, String passwordHash) {
+    public User(String firstName,
+                String lastName,
+                String email,
+                String passwordHash)
+    {
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.email = email;
         this.passwordHash = passwordHash;
     }
 
     public UUID getId() { return id; }
+
+    public String getFullName()
+    {
+        return String.format( "%s %s", firstName, lastName );
+    }
     public String getEmail() { return email; }
     public String getPasswordHash() { return passwordHash; }
 }
