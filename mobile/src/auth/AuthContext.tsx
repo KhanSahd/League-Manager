@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
 import { api } from "../api/client";
+import { useRouter } from "expo-router";
 
-type User = { id: string; email: string };
+type User = { id: string; email: string; fullName: string };
 
 type AuthContextType = {
   token: string | null;
@@ -18,6 +19,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     (async () => {
@@ -47,6 +49,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await SecureStore.deleteItemAsync("token");
     setToken(null);
     setUser(null);
+    if (ready && !user)
+    {
+      router.replace("/login");
+    }
   }
 
   return (

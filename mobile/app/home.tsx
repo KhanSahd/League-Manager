@@ -29,7 +29,7 @@ export default function Home() {
               marginTop: theme.spacing.xs,
             }}
       >
-          {user.email}
+          {user.fullName}
         </Text>
       }
 

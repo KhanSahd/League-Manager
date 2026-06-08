@@ -1,6 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 
-const BASE_URL = "http://10.0.0.153:8080/api";
+const BASE_URL = "http://10.0.0.70:8080/api";
 
 async function getToken() {
   return SecureStore.getItemAsync("token");
@@ -11,7 +11,6 @@ export async function api<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const token = await getToken();
-  console.log("TOKEN", token);
 
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
@@ -23,8 +22,8 @@ export async function api<T>(
   });
 
   if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || `HTTP ${res.status}`);
+    const text = await res.json();
+    throw new Error(text.message || `HTTP ${res.status}`);
   }
 
   // Handle empty responses (e.g. 204 No Content)

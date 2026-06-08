@@ -18,10 +18,10 @@ public class User {
     @Column(nullable = false)
     private String email;
 
-    @Column(nullable = false)
+    @Column()
     private String firstName;
 
-    @Column(nullable = false)
+    @Column()
     private String lastName;
 
     @Column(nullable = false)
@@ -53,4 +53,9 @@ public class User {
     }
     public String getEmail() { return email; }
     public String getPasswordHash() { return passwordHash; }
+
+    public void setPasswordHash(String passwordHash )
+    {
+        this.passwordHash = passwordHash;
+    }
 }

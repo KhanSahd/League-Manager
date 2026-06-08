@@ -6,7 +6,9 @@ import com.resend.services.emails.model.CreateEmailOptions;
 import com.sahdkhan.leaguemanager.exceptions.UnableToSendEmailException;
 import com.sahdkhan.leaguemanager.user.User;
 import com.sahdkhan.leaguemanager.user.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
@@ -22,13 +24,16 @@ public class PasswordResetService
     private final UserRepository users;
     private final ResetTokenRepository resetTokenRepository;
     private Resend mailSender;
+    private final BCryptPasswordEncoder encoder;
 
     public PasswordResetService(UserRepository users,
                                 ResetTokenRepository resetTokenRepository,
-                                @Value("${resend.api.key}") String resendApiKey) {
+                                @Value("${resend.api.key}") String resendApiKey,
+                                BCryptPasswordEncoder encoder) {
         this.users = users;
         this.resetTokenRepository = resetTokenRepository;
         this.mailSender = new Resend( resendApiKey );
+        this.encoder = encoder;
     }
 
     /**
@@ -66,6 +71,7 @@ public class PasswordResetService
      * it generates a reset token, saves it to the database, and sends a reset email
      * @param email the email address to send the reset link to
      */
+    @Transactional
     public void processRequest(String email)
     {
         Optional<User> userOpt = users.findByEmail(email);
@@ -98,15 +104,35 @@ public class PasswordResetService
 
     public void sendEmail(String email, String token) throws ResendException
     {
-        String resetUrl = "leaguemanager://reset-password?token=" + token;
+//        String resetUrl = "leaguemanager://reset-password?token=" + token;
+        String resetUrl = "http://localhost:5173?token=" + token;
+        // exp://127.0.0.1:8081/--/path-to-screen
 
         CreateEmailOptions params = CreateEmailOptions.builder()
-                .from("noreply@sahdkhan.com")
-                .to(email)
-                .subject("Reset your password")
-                .html("<p>Click below to reset your password:</p>"
-                        + "<a href=\"" + resetUrl + "\">Reset Password</a>")
+                .from( "noreply@sahdkhan.com" )
+                .to( email )
+                .subject("League Manager - Reset your password")
+                .html("<h1>League Manager</h1>" +
+                        "<h2>Password Reset Requested</h2>" +
+                        "<p>Click below to reset your password:</p>" +
+                        "<a href=\"" + resetUrl + "\">Reset Password</a>")
                 .build();
         mailSender.emails().send(params);
+    }
+
+    public void resetPassword(String token, String newPassword)
+    {
+        ResetToken validToken = resetTokenRepository.findByToken( token )
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Token"));
+
+        if (validToken.isExpired()) {
+            resetTokenRepository.delete(validToken);
+            throw new IllegalStateException("Token has expired");
+        }
+
+        User userToUpdate = validToken.getUser();
+        userToUpdate.setPasswordHash( encoder.encode(newPassword) );
+        users.save( userToUpdate );
+        resetTokenRepository.delete( validToken );
     }
 }

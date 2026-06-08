@@ -1,5 +1,6 @@
 package com.sahdkhan.leaguemanager.auth;
 
+import com.sahdkhan.leaguemanager.exceptions.InvalidCredentialsException;
 import com.sahdkhan.leaguemanager.user.User;
 import com.sahdkhan.leaguemanager.user.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -62,9 +63,9 @@ public class AuthService {
      */
     public String login(String email, String password) {
         User user = users.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+                .orElseThrow( InvalidCredentialsException::new );
         if (!encoder.matches(password, user.getPasswordHash())) {
-            throw new IllegalArgumentException("Invalid credentials");
+            throw new InvalidCredentialsException();
         }
         return jwt.generate(user.getId(), user.getEmail());
     }
