@@ -1,7 +1,6 @@
 package com.sahdkhan.leaguemanager.league;
 
 import com.sahdkhan.leaguemanager.config.JwtAuthFilter.AuthPrincipal;
-import com.sahdkhan.leaguemanager.user.User;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;

@@ -1,6 +1,5 @@
 package com.sahdkhan.leaguemanager.team;
 
-import com.sahdkhan.leaguemanager.user.User;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import com.sahdkhan.leaguemanager.config.JwtAuthFilter.AuthPrincipal;
 import org.springframework.web.bind.annotation.*;

@@ -20,7 +20,6 @@ import java.util.Optional;
 @Service
 public class PasswordResetService
 {
-    private static final SecureRandom secureRandom = new SecureRandom();
     private final UserRepository users;
     private final ResetTokenRepository resetTokenRepository;
     private Resend mailSender;
