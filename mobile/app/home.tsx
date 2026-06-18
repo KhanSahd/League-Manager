@@ -29,7 +29,7 @@ export default function Home() {
               marginTop: theme.spacing.xs,
             }}
       >
-          {user.fullName}
+          {user.firstName + " " + user.lastName}
         </Text>
       }
 

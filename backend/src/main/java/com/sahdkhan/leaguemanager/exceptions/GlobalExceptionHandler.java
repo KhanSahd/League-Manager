@@ -11,15 +11,27 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler
 {
+    public record ErrorResponse(int status, String error, String message, String timestamp) {}
     @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<?> handleInvalidCredentials( InvalidCredentialsException ex) {
-        return ResponseEntity
-                .status( HttpStatus.UNAUTHORIZED)
-                .body( Map.of(
-                        "status", 401,
-                        "error", "Unauthorized",
-                        "message", ex.getMessage(),
-                        "timestamp", Instant.now().toString()
-                ));
+    public ResponseEntity<ErrorResponse> handleInvalidCredentials( InvalidCredentialsException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                401,
+                "Unauthorized",
+                ex.getMessage(),
+                Instant.now().toString()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+
+    @ExceptionHandler( IllegalArgumentException.class )
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException( IllegalArgumentException ex )
+    {
+        ErrorResponse errorResponse = new ErrorResponse(
+                400,
+                "Bad Request",
+                ex.getMessage(),
+                Instant.now().toString()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 }

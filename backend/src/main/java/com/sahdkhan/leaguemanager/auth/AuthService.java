@@ -1,10 +1,13 @@
 package com.sahdkhan.leaguemanager.auth;
 
 import com.sahdkhan.leaguemanager.exceptions.InvalidCredentialsException;
+import com.sahdkhan.leaguemanager.responses.UserResponse;
 import com.sahdkhan.leaguemanager.user.User;
 import com.sahdkhan.leaguemanager.user.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * Service class for handling user authentication.
@@ -32,8 +35,11 @@ public class AuthService {
     }
 
     // I need a method that gets all users from the database for testing purposes
-    public Iterable<User> getAllUsers() {
-        return users.findAll();
+    public List<UserResponse> getAllUsers() {
+        return users.findAll().stream().map( user -> new UserResponse( user.getId().toString(),
+                                                                       user.getEmail(),
+                                                                       user.getFirstName(),
+                                                                       user.getLastName() ) ).toList();
     }
 
     /**

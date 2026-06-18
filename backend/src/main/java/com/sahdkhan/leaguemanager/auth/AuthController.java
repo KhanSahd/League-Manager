@@ -1,9 +1,12 @@
 package com.sahdkhan.leaguemanager.auth;
 
+import com.sahdkhan.leaguemanager.responses.UserResponse;
 import com.sahdkhan.leaguemanager.user.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * Controller for handling authentication requests such as registration and login.
@@ -38,7 +41,7 @@ public class AuthController {
 
     /** Endpoint for getting all users (for testing purposes). */
     @GetMapping("/users")
-    public Iterable< User > getAllUsers() {
+    public List<UserResponse> getAllUsers() {
         return auth.getAllUsers();
     }
 

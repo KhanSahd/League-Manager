@@ -3,7 +3,7 @@ import * as SecureStore from "expo-secure-store";
 import { api } from "../api/client";
 import { useRouter } from "expo-router";
 
-type User = { id: string; email: string; fullName: string };
+type User = { id: string; firstName: string, lastName: string, email: string;  };
 
 type AuthContextType = {
   token: string | null;
