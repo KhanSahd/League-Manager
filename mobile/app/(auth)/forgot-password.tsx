@@ -16,7 +16,7 @@ export default function ForgotPassword() {
         setError(null);
         console.log(email);
         try {
-            const res = await api<{ message: string }>("/password-reset/reset-password", {
+            const res = await api<{ message: string }>("/password-reset/forgot-password", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email }),
