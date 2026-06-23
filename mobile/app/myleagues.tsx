@@ -10,7 +10,7 @@ import { EmptyState } from "../src/ui/EmptyState";
 import SportIcon from "../src/ui/SportIcon";
 import Entypo from "@expo/vector-icons/Entypo";
 
-export default function Leagues() {
+export default function MyLeagues() {
 
   const router = useRouter();
 

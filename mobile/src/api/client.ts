@@ -1,6 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 
-const BASE_URL = "http://10.0.0.152:8080/api";
+const BASE_URL = `http://${process.env.EXPO_PUBLIC_IP_ADDY}:8080/api`;
 
 async function getToken() {
   return SecureStore.getItemAsync("token");
@@ -11,6 +11,7 @@ export async function api<T>(
   options: RequestInit = {}
 ): Promise<T> 
 {
+  console.log(`Making api call to ${BASE_URL}${path}`)
   const token = await getToken();
 
   const res = await fetch(`${BASE_URL}${path}`, 
@@ -26,32 +27,13 @@ export async function api<T>(
 
   if (!res.ok) 
   {
-    const text = await res.text();
-
-    try 
-    {
-      const json = JSON.parse(text);
-      throw new Error(json.message || `HTTP ${res.status}`);
-    } 
-    catch 
-    {
-      throw new Error(text || `HTTP ${res.status}`);
-    }
+    const data = await res.json();
+    throw new Error(data.message || `HTTP ${res.status}`);
   }
 
-  if (res.status === 204) 
-  {
-    return undefined as T;
-  }
+  const data = await res.json();
 
-  const text = await res.text();
-
-  if (!text) 
-  {
-    return undefined as T;
-  }
-
-  return JSON.parse(text) as T;
+  return data as T;
 }
 
 export { BASE_URL };

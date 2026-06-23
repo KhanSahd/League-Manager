@@ -18,20 +18,8 @@ export default function Home() {
           fontWeight: "500",
         }}
       >
-        Account
+        Welcome {user?.firstName + " " + user?.lastName}
       </Text>
-      
-      {user &&
-        <Text
-        style={{
-              fontSize: theme.textSize.sm,
-              color: theme.colors.muted,
-              marginTop: theme.spacing.xs,
-            }}
-      >
-          {user.firstName + " " + user.lastName}
-        </Text>
-      }
 
       <Card>
         <Text
@@ -45,10 +33,20 @@ export default function Home() {
           Leagues
         </Text>
 
-        <Button
-          label="View My Leagues"
-          onPress={() => router.push("/leagues")}
-        />
+        <View style={{
+          flexDirection: "column",
+          gap: "15"
+        }}>
+          <Button
+            label="Join Leagues"
+            onPress={() => router.push("/findleagues")}
+          />
+
+          <Button
+            label="View My Leagues"
+            onPress={() => router.push("/myleagues")}
+          />
+        </View>
       </Card>
 
       <View style={{ marginTop: "auto" }}>

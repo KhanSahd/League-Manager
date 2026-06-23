@@ -12,10 +12,11 @@ export default function RootLayout() {
   const segments = useSegments();
   const titleMap: Record<string, string> = {
     home: "Home",
-    leagues: "My Leagues",
+    myleagues: "My Leagues",
     teams: "Teams",
     roster: "Roster",
     login: "Login",
+    findleagues: "Find a League"
   };
 
   const current = segments[segments.length - 1];

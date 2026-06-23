@@ -35,10 +35,7 @@ public class LeagueController {
      * @param name the new name of the league
      * @param sport the new sport of the league
      */
-    public record UpdateLeagueRequest(
-            String name,
-            String sport
-    ) {}
+    public record UpdateLeagueRequest( String name, String sport ) {}
     public record LeagueResponse(UUID id, String name, String sport, LeagueRole role) {}
 
     @PostMapping
