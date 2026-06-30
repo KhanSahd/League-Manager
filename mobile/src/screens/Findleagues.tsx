@@ -1,13 +1,14 @@
 import { View, Text } from 'react-native'
 import React from 'react'
-import { theme } from '../src/ui/theme'
-import { Input } from '../src/ui/Input'
+import { theme } from '../ui/theme'
+import { Input } from '../ui/Input'
 
-export default function findleagues() {
+export default function Findleagues() {
   return (
-      <View style={{ flexDirection: "column", gap: 20 }}>
+      <View style={{ flex: 1, flexDirection: "column", gap: 20, backgroundColor: theme.colors.bg }}>
           {/* Filters */}
           <View style={{
+              marginTop: 20,
               flexDirection: "row",
               justifyContent: 'space-evenly'
           }}>

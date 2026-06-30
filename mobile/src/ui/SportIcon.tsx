@@ -11,7 +11,7 @@ export default function SportIcon({ sport }: { sport: string }) {
     case "basketball":
         return <FontAwesome6 name="basketball" size={24} color="brown" />;
     case "baseball":
-        return <FontAwesome6 name="baseball-bat-ball" size={24} color="white" />;
+        return <FontAwesome6 name="baseball-bat-ball" size={24} color="black" />;
     case "tennis":
         return <Ionicons name="tennisball" size={24} color="green" />
       default:

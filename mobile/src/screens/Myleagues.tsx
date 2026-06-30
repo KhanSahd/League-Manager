@@ -1,18 +1,19 @@
 import { View, Text, Pressable, FlatList, TextInput, Modal } from "react-native";
 import { useEffect, useState } from "react";
-import { createLeague, getMyLeagues, League, updateLeague } from "../src/api/league";
-import { useRouter } from "expo-router";
-import { Card } from "../src/ui/Card";
-import { Input } from "../src/ui/Input";
-import { Button } from "../src/ui/Button";
-import { theme } from "../src/ui/theme";
-import { EmptyState } from "../src/ui/EmptyState";
-import SportIcon from "../src/ui/SportIcon";
+import { createLeague, getMyLeagues, League, updateLeague } from "../api/league";
+import { Card } from "../ui/Card";
+import { Input } from "../ui/Input";
+import { Button } from "../ui/Button";
+import { theme } from "../ui/theme";
+import { EmptyState } from "../ui/EmptyState";
+import SportIcon from "../ui/SportIcon";
 import Entypo from "@expo/vector-icons/Entypo";
+import { useNavigation } from "@react-navigation/native";
 
 export default function MyLeagues() {
 
-  const router = useRouter();
+  // const router = useRouter();
+  const nav = useNavigation();
 
   const [leagues, setLeagues] = useState<League[]>([]);
   const [name, setName] = useState("");
@@ -65,6 +66,7 @@ export default function MyLeagues() {
         paddingHorizontal: theme.spacing.lg,
         paddingBottom: theme.spacing.lg,
         gap: theme.spacing.md,
+        backgroundColor: theme.colors.bg
       }}
     >
       {fetching ? null : leagues.length === 0 ? (
@@ -77,10 +79,15 @@ export default function MyLeagues() {
           renderItem={({ item }) => (
             <Pressable style={{ paddingVertical: 6 }}
               onPress={() => {
-                router.push({
-                  pathname: "/teams",
-                  params: { leagueId: item.id, leagueName: item.name, role: item.role }
-                })
+                // router.push({
+                //   pathname: "/teams",
+                //   params: { leagueId: item.id, leagueName: item.name, role: item.role }
+                // })
+                nav.navigate("Teams", {
+                    leagueId: item.id,
+                    leagueName: item.name,
+                    role: item.role
+                } )
               }}
             >
               <Card>
@@ -125,7 +132,7 @@ export default function MyLeagues() {
       )}
 
       {fetching == false && (
-        <Card>
+        <View>
           <Text
             style={{
               fontSize: theme.textSize.md,
@@ -152,8 +159,7 @@ export default function MyLeagues() {
           <View style={{ height: theme.spacing.md }} />
 
           <Button label={creating ? "Creating..." : "Create"} onPress={submit} />
-        </Card>
-        
+        </View>
       )}
 
       <Modal visible={selectedLeague !== null} animationType="slide" transparent={true}>
