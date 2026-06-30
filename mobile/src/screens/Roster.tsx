@@ -1,19 +1,19 @@
 import { View, Text, FlatList, Alert, TouchableOpacity } from "react-native";
 import { useEffect, useState } from "react";
-import { useLocalSearchParams } from "expo-router";
-import { addPlayer, getPlayers, Player, removePlayer } from "../src/api/teams";
-import { Button } from "../src/ui/Button";
-import { Input } from "../src/ui/Input";
-import { Card } from "../src/ui/Card";
-import { emptyTextStyle, theme } from "../src/ui/theme";
-import { EmptyState } from "../src/ui/EmptyState";
+import { addPlayer, getPlayers, Player, removePlayer } from "../api/teams";
+import { Button } from "../ui/Button";
+import { Input } from "../ui/Input";
+import { Card } from "../ui/Card";
+import { emptyTextStyle, theme } from "../ui/theme";
+import { EmptyState } from "../ui/EmptyState";
 import Entypo from "@expo/vector-icons/Entypo";
-import { League } from "../src/api/league";
-import { confirm } from "../src/ui/Helper";
+import { League } from "../api/league";
+import { confirm } from "../ui/Helper";
 
 export default function Roster() {
-  const { teamId, teamName, role } = useLocalSearchParams();
-  const canDelete = role != "MEMBER";
+  // const { teamId, teamName, role } = useLocalSearchParams();
+  // const canDelete = role != "MEMBER";
+  const canDelete = true;
   const [players, setPlayers] = useState<Player[]>([]);
   const [name, setName] = useState("");
   const [fetching, setFetching] = useState(true);
@@ -24,14 +24,14 @@ export default function Roster() {
 
   async function load() {
     setFetching(true);
-    setPlayers(await getPlayers(teamId as string));
+    // setPlayers(await getPlayers(teamId as string));
     setFetching(false);
   }
 
   async function submit() {
     if (!name) return;
     setCreating(true);
-    await addPlayer(teamId as string, name);
+    // await addPlayer(teamId as string, name);
     setName("");
     await load();
     setCreating(false);
@@ -40,7 +40,7 @@ export default function Roster() {
   async function deletePlayer(playerId: string) {
     if (!playerId) return;
     try {
-      await removePlayer(teamId as string, playerId as string);
+      // await removePlayer(teamId as string, playerId as string);
     }
     catch (error) {
       Alert.alert("Failed to remove player: " + error);
@@ -89,7 +89,7 @@ export default function Roster() {
             fontWeight: "600",
           }}
         >
-          {teamName}
+          {/* {teamName} */}
         </Text>
         { canDelete && <Entypo name="edit" size={24} color={theme.colors.text}
           onPress={() => setInEditMode(!inEditMode)}

@@ -1,33 +1,40 @@
-import { View, Text, } from 'react-native'
-import { useState } from 'react'
-import { useRouter } from 'expo-router'
-import { theme } from '../../src/ui/theme'
-import { Input } from '../../src/ui/Input'
-import { Button } from '../../src/ui/Button'
-import { api } from '../../src/api/client'
-import { useAuth } from '../../src/auth/AuthContext'
+import { View, Text } from 'react-native'
+import React, { useState } from 'react'
+import { api } from '../../api/client'
+import { theme } from '../../ui/theme'
+import { Input } from '../../ui/Input'
+import { Button } from '../../ui/Button'
+import { useNavigation } from '@react-navigation/native'
+import { AuthResponse } from '../../../types'
+import * as SecureStore from "expo-secure-store";
+import { useDispatch } from 'react-redux'
+import { loginSuccess, setToken } from '../../redux/slices/AuthSlice'
 
-const register = () => {
-    const [firstName, setFirstName] = useState("")
+type User = { id: string; firstName: string, lastName: string, email: string;  };
+
+const Register = () => {
+  const [firstName, setFirstName] = useState("")
     const [lastName, setLastName] = useState("")
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmedPassword, setConfirmedPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
-
-    const router = useRouter();
-    const { signIn } = useAuth();
+    const navigation = useNavigation();
+    const dispatch = useDispatch();
 
     async function submit() {
         setError(null);
         try {
-          const res = await api<{ token: string }>("/auth/register", {
+          const res = await api<AuthResponse>("/auth/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ firstName, lastName, email, password }),
           });
-          await signIn(res.token);
-          router.replace("/home");
+          await SecureStore.setItemAsync("token", res.token);
+          dispatch(setToken(res.token))
+          const user = await api<User>("/me")
+          dispatch(loginSuccess({user: user}));
+        //   router.replace("/home");
         } catch (e: any) {
           setError(e.message);
         }
@@ -39,17 +46,10 @@ const register = () => {
                 flex: 1,
                 paddingHorizontal: theme.spacing.lg,
                 paddingBottom: theme.spacing.lg,
+                paddingTop: theme.spacing.lg,
                 gap: theme.spacing.md,
         }}
     >
-        <Text
-        style={{
-          fontSize: theme.textSize.xl,
-          color: theme.colors.text,
-        }}
-        >
-            Register
-        </Text>
       {error &&
         <Text
           style={{
@@ -74,7 +74,7 @@ const register = () => {
 
         <Button onPress={submit} label="Register" />
         <Button
-        onPress={() => router.push("/login")}
+        onPress={() => navigation.navigate("Login")}
         label="Already have an account? Login"
         variant="secondary"
         />
@@ -82,4 +82,4 @@ const register = () => {
     )
 }
 
-export default register
+export default Register

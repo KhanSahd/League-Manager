@@ -1,13 +1,12 @@
 import { Pressable, Text } from "react-native";
-import { useRouter } from "expo-router";
 import { theme } from "./theme";
 
 export function BackButton({ label = "Back" }: { label?: string }) {
-  const router = useRouter();
+  // const router = useRouter();
 
   return (
     <Pressable
-      onPress={() => router.back()}
+      onPress={() => null} // fix me
       style={{
         paddingVertical: theme.spacing.sm,
         paddingHorizontal: theme.spacing.md,

@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
 import { Alert, Text, View } from 'react-native'
-import { theme } from '../../src/ui/theme'
-import { Input } from '../../src/ui/Input'
-import { Button } from '../../src/ui/Button';
-import { api } from '../../src/api/client';
-import { useRouter } from 'expo-router';
+import { api } from '../../api/client';
+import { theme } from '../../ui/theme';
+import { Input } from '../../ui/Input';
+import { Button } from '../../ui/Button';
+import { StackActions, useNavigation } from '@react-navigation/native';
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState("");
     const [error, setError] = useState<string | null>(null);
 
-    const router = useRouter();
+    const navigation = useNavigation();
 
     async function handleResetPassword(){
         setError(null);
@@ -23,7 +23,9 @@ export default function ForgotPassword() {
             });
             console.log("API RESPONSE:", res);
             Alert.alert(res.message);
-            router.replace("/login");
+            navigation.dispatch(
+                StackActions.replace("Login")
+            );
             return;
         } catch (e: any) {
             console.log("RESET ERROR:", e);
@@ -37,19 +39,10 @@ export default function ForgotPassword() {
             flex: 1,
             paddingHorizontal: theme.spacing.lg,
             paddingBottom: theme.spacing.lg,
+            paddingTop: theme.spacing.lg,
             gap: theme.spacing.md,
             }}
-        >
-            <Text
-            style={{
-                fontSize: theme.textSize.xl,
-                color: theme.colors.text,
-                textAlign: "center",
-            }}
-            >
-              Forgot Password
-            </Text>
-            
+        >   
             <Input
                 placeholder="Email"
                 autoCapitalize="none"

@@ -1,14 +1,15 @@
 export const theme = {
   colors: {
-    bg: "#000000",        // slate-900
-    card: "#000000",      // gray-900
-    text: "#E5E7EB",      // gray-200
-    muted: "#9CA3AF",     // gray-400
-    primary: "#29D14E",   // sky-400
+    bg: "#ffffff",        // slate-900
+    card: "#e3e3e3",      // gray-900
+    text: "#000000",      // gray-200
+    muted: "#3c3c3c",     // gray-400
+    primary: "#8A84E2",   // sky-400
     secondary: "#BC209A", // amber-400
     danger: "#F87171",
     border: "#1F2937",
     error: "#EF4444",
+    font: "RobotoMono-VariableFont_wght"
   },
   spacing: {
     xs: 6,

@@ -23,6 +23,7 @@ league-manager/
 ## 🧠 Tech Stack
 
 ### Backend
+
 - Java 17+
 - Spring Boot
 - Spring Security (JWT authentication)
@@ -31,10 +32,11 @@ league-manager/
 - Gradle
 
 ### Mobile
+
 - Expo (Managed Workflow)
 - React Native
 - TypeScript
-- expo-router
+- React-Navigation
 - SecureStore (token storage)
 
 ---
@@ -127,6 +129,7 @@ npx expo start
 ```
 
 Then:
+
 - Scan QR code with **Expo Go** (iOS / Android)
 - Or run in an emulator
 

@@ -25,11 +25,17 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "output": "server"
+      "output": "single"
     },
     "plugins": [
-      "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      ["expo-font", 
+        {
+          "fonts": [
+                "./assets/fonts/RobotoMono-VariableFont_wght.ttf"
+              ]
+        }
+      ]
     ]
   }
 }
