@@ -1,25 +1,33 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
-type User = {
-    id: string;
-    firstName: string,
-    lastName: string,
-    email: string;
-}
-
-type AuthState = {
-  user: User | null;
-  token: string | null;
-  loading: boolean;
-  error: string | null;
-};
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { AuthState, User } from "../../../types";
+import { api } from "../../api/client";
+import * as SecureStore from "expo-secure-store";
 
 const initialState: AuthState = {
     user: null,
     token: null,
     loading: false,
+    ready: false,
     error: null
 }
+
+export const bootstrapAuth = createAsyncThunk<{ token: string; user: User } | null, void, { rejectValue: string }>(
+    "auth/bootstrap",
+    async (_, thunkAPI) =>
+    {
+        try {
+            const token = await SecureStore.getItemAsync("token");
+
+            if (!token) return null;
+
+            const user = await api<User>("/me");
+
+            return { token, user };
+        } catch (err: any) {
+            await SecureStore.deleteItemAsync("token");
+            return thunkAPI.rejectWithValue(err.message || "Session expired");
+        }
+});
 
 const authSlice = createSlice({
     name: 'auth',
@@ -66,6 +74,25 @@ const authSlice = createSlice({
         {
             state.user = action.payload;
         },
+    },
+    extraReducers: (builder) =>
+    {
+        builder.addCase(bootstrapAuth.pending, (state) => {
+            state.ready = false;
+        })
+        .addCase(bootstrapAuth.fulfilled, (state, action) => {
+            state.ready = true;
+
+            if (action.payload) {
+                state.token = action.payload.token;
+                state.user = action.payload.user;
+            }
+        })
+        .addCase(bootstrapAuth.rejected, (state) => {
+            state.ready = true;
+            state.token = null;
+            state.user = null;
+        });
     }
 });
 

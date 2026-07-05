@@ -13,7 +13,9 @@ export default function SportIcon({ sport }: { sport: string }) {
     case "baseball":
         return <FontAwesome6 name="baseball-bat-ball" size={24} color="black" />;
     case "tennis":
-        return <Ionicons name="tennisball" size={24} color="green" />
+        return <Ionicons name="tennisball" size={24} color="#CCFF00" />
+    case "football":
+      return <Ionicons name="american-football" size={24} color="#815337" />;
       default:
           if ( sport.toLowerCase().includes("2k") || sport.toLowerCase().includes("nba") ) {
               return <MaterialIcons name="2k" size={24} color="red" />

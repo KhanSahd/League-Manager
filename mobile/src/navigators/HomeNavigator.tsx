@@ -1,15 +1,13 @@
-import { View, Text } from 'react-native'
-import { useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import Home from '../screens/Home';
 import { Header } from '../ui/Header';
 import Findleagues from '../screens/Findleagues';
 import MyLeagues from '../screens/Myleagues';
 import Teams from '../screens/Teams';
+import { RootStackParamList } from '../../types';
 
 const HomeNavigator = () => {
-    const navigation = useNavigation();
-    const stack = createStackNavigator();
+    const stack = createStackNavigator<RootStackParamList>();
 
     return (
         <stack.Navigator>

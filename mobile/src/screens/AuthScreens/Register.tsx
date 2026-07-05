@@ -7,8 +7,8 @@ import { Button } from '../../ui/Button'
 import { useNavigation } from '@react-navigation/native'
 import { AuthResponse } from '../../../types'
 import * as SecureStore from "expo-secure-store";
-import { useDispatch } from 'react-redux'
 import { loginSuccess, setToken } from '../../redux/slices/AuthSlice'
+import { useAppDispatch } from '../../redux/hooks'
 
 type User = { id: string; firstName: string, lastName: string, email: string;  };
 
@@ -20,7 +20,7 @@ const Register = () => {
     const [confirmedPassword, setConfirmedPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const navigation = useNavigation();
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
 
     async function submit() {
         setError(null);

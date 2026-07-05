@@ -1,39 +1,31 @@
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from 'expo-secure-store';
 
 const BASE_URL = `http://${process.env.EXPO_PUBLIC_IP_ADDY}:8080/api`;
 
 async function getToken() {
-  return SecureStore.getItemAsync("token");
+	return SecureStore.getItemAsync('token');
 }
 
-export async function api<T>(
-  path: string,
-  options: RequestInit = {}
-): Promise<T> 
-{
-  console.log(`Making api call to ${BASE_URL}${path}`)
-  const token = await getToken();
+export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
+	const token = await getToken();
 
-  const res = await fetch(`${BASE_URL}${path}`, 
-  {
-    ...options,
-    headers: 
-    {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options.headers || {}),
-    },
-  });
+	const res = await fetch(`${BASE_URL}${path}`, {
+		...options,
+		headers: {
+			'Content-Type': 'application/json',
+			...(token ? { Authorization: `Bearer ${token}` } : {}),
+			...(options.headers || {}),
+		},
+	});
 
-  if (!res.ok) 
-  {
-    const data = await res.json();
-    throw new Error(data.message || `HTTP ${res.status}`);
-  }
+	if (!res.ok) {
+		const data = await res.json();
+		throw new Error(data.message || `HTTP ${res.status}`);
+	}
 
-  const data = await res.json();
+	const data = await res.json();
 
-  return data as T;
+	return data as T;
 }
 
 export { BASE_URL };

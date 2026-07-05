@@ -1,201 +1,208 @@
-import { View, Text, Pressable, FlatList, TextInput, Modal } from "react-native";
-import { useEffect, useState } from "react";
-import { createLeague, getMyLeagues, League, updateLeague } from "../api/league";
-import { Card } from "../ui/Card";
-import { Input } from "../ui/Input";
-import { Button } from "../ui/Button";
-import { theme } from "../ui/theme";
-import { EmptyState } from "../ui/EmptyState";
-import SportIcon from "../ui/SportIcon";
-import Entypo from "@expo/vector-icons/Entypo";
-import { useNavigation } from "@react-navigation/native";
+import { View, Text, Pressable, FlatList, TextInput, Modal } from 'react-native';
+import { useState } from 'react';
+import { Card } from '../ui/Card';
+import { Input } from '../ui/Input';
+import { Button } from '../ui/Button';
+import { theme } from '../ui/theme';
+import { EmptyState } from '../ui/EmptyState';
+import SportIcon from '../ui/SportIcon';
+import Entypo from '@expo/vector-icons/Entypo';
+import { useNavigation } from '@react-navigation/native';
+import {
+	clearSelectedLeague,
+	createNewLeague,
+	setSelectedLeague,
+	updateLeagueInfo,
+} from '../redux/slices/leaguesSlice';
+import { RootState } from '../redux/store';
+import { League, RootStackParamList } from '../../types';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
+import { StackNavigationProp } from '@react-navigation/stack';
 
 export default function MyLeagues() {
+	// const router = useRouter();
+	type navigationProp = StackNavigationProp<RootStackParamList>;
+	const nav = useNavigation<navigationProp>();
 
-  // const router = useRouter();
-  const nav = useNavigation();
+	const leagues = useAppSelector((state: RootState) => state.leagues.leagues);
+	const selectedLeague = useAppSelector((state: RootState) => state.leagues.selectedLeague);
+	const [createName, setCreateName] = useState('');
+	const [createSport, setCreateSport] = useState('');
+	const [updateName, setUpdateName] = useState('');
+	const [updateSport, setUpdateSport] = useState('');
+	const [creating, setCreating] = useState(false);
+	const dispatch = useAppDispatch();
 
-  const [leagues, setLeagues] = useState<League[]>([]);
-  const [name, setName] = useState("");
-  const [sport, setSport] = useState("");
-  const [fetching, setFetching] = useState(true);
-  const [creating, setCreating] = useState(false);
-  const [selectedLeague, setSelectedLeague] = useState<League | null>(null);
+	async function submit() {
+		if (!createName || !createSport) return;
+		setCreating(true);
+		await dispatch(createNewLeague({ name: createName, sport: createSport }));
+		clearValues();
+		setCreating(false);
+	}
 
-  async function load() {
-    setFetching(true);
-    const data = await getMyLeagues();
-    setLeagues(data);
-    setFetching(false);
-  }
+	async function updateLeague(name: string, sport: string) {
+		if (!name || !sport) return;
+		const id = selectedLeague?.id;
+		if (!id) return;
+		await dispatch(updateLeagueInfo({ id, name, sport }));
+	}
 
-  async function submit() {
-    if (!name || !sport) return;
-    setCreating(true);
-    await createLeague(name, sport);
-    clearValues();
-    await load();
-    setCreating(false);
-  }
+	function setValuesFromLeague(league: League) {
+		setUpdateName(league.name);
+		setUpdateSport(league.sport);
+	}
 
-  async function updateLeagueInfo(leagueId: string, name: string, sport: string) {
-    if (!leagueId || !name || !sport) return;
-    await updateLeague(leagueId, name, sport);
-    await load();
-  }
+	function clearValues() {
+		setUpdateName('');
+		setUpdateSport('');
+		dispatch(clearSelectedLeague());
+	}
 
-  function setValuesFromLeague(league: League) {
-    setName(league.name);
-    setSport(league.sport);
-  }
+	return (
+		<View
+			style={{
+				flex: 1,
+				paddingHorizontal: theme.spacing.lg,
+				paddingBottom: theme.spacing.lg,
+				gap: theme.spacing.md,
+				backgroundColor: theme.colors.bg,
+			}}
+		>
+			{useAppSelector((state: RootState) => state.leagues.loading) ? null : leagues?.length ===
+			  0 ? (
+				<EmptyState message="You are not part of any leagues yet." />
+			) : (
+				<FlatList
+					data={leagues}
+					keyExtractor={(l) => l.id}
+					contentContainerStyle={{ gap: theme.spacing.sm }}
+					renderItem={({ item }) => (
+						<Pressable
+							style={{ paddingVertical: 6 }}
+							onPress={() => {
+								nav.navigate('Teams', { leagueId: item.id });
+							}}
+						>
+							<Card>
+								<View
+									style={{
+										flexDirection: 'row',
+										alignItems: 'center',
+										justifyContent: 'space-between',
+									}}
+								>
+									{/* LEFT SIDE OF THE CARD. */}
+									<View style={{ flexDirection: 'column', gap: theme.spacing.xs, flex: 1 }}>
+										{/* TOP ROW OF THE LEFT HALF OF THE CARD. CONTAINS THE SPORT ICON AND LEAGUE NAME */}
+										<View
+											style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}
+										>
+											<SportIcon sport={item.sport} />
+											<Text
+												style={{
+													fontSize: theme.textSize.md,
+													color: theme.colors.text,
+													fontWeight: '500',
+												}}
+											>
+												{item.name}
+											</Text>
+										</View>
+										{/* BOTTOM ROW OF THE LEFT HALF OF THE CARD. CONTAINS THE SPORT AND ROLE */}
+										<Text
+											style={{
+												fontSize: theme.textSize.sm,
+												color: theme.colors.muted,
+												marginTop: theme.spacing.xs,
+											}}
+										>
+											{item.sport} · {item.role}
+										</Text>
+									</View>
+									{/* RIGHT SIDE OF THE CARD. HAS THE  */}
+									{(item.role === 'OWNER' || item.role === 'ADMIN') && (
+										<Entypo
+											name="edit"
+											size={24}
+											color={theme.colors.text}
+											onPress={() => (dispatch(setSelectedLeague(item)), setValuesFromLeague(item))}
+										/>
+									)}
+								</View>
+							</Card>
+						</Pressable>
+					)}
+				/>
+			)}
 
-  function clearValues() {
-    setName("");
-    setSport("");
-    setSelectedLeague(null);
-  }
+			{useAppSelector((state: RootState) => !state.leagues.loading) && (
+				<View>
+					<Text
+						style={{
+							fontSize: theme.textSize.md,
+							color: theme.colors.text,
+							fontWeight: '500',
+							marginBottom: theme.spacing.sm,
+						}}
+					>
+						Create League
+					</Text>
 
-  useEffect(() => {
-    load();
-  }, []);
+					<Input placeholder="League name" value={createName} onChangeText={setCreateName} />
 
-  return (
-    <View
-      style={{
-        flex: 1,
-        paddingHorizontal: theme.spacing.lg,
-        paddingBottom: theme.spacing.lg,
-        gap: theme.spacing.md,
-        backgroundColor: theme.colors.bg
-      }}
-    >
-      {fetching ? null : leagues.length === 0 ? (
-        <EmptyState message="You are not part of any leagues yet." />
-      ) : (
-        <FlatList
-          data={leagues}
-          keyExtractor={(l) => l.id}
-          contentContainerStyle={{ gap: theme.spacing.sm }}
-          renderItem={({ item }) => (
-            <Pressable style={{ paddingVertical: 6 }}
-              onPress={() => {
-                // router.push({
-                //   pathname: "/teams",
-                //   params: { leagueId: item.id, leagueName: item.name, role: item.role }
-                // })
-                nav.navigate("Teams", {
-                    leagueId: item.id,
-                    leagueName: item.name,
-                    role: item.role
-                } )
-              }}
-            >
-              <Card>
-                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-                  {/* LEFT SIDE OF THE CARD. */}
-                  <View style={{ flexDirection: "column", gap: theme.spacing.xs, flex: 1 }}>
-                    {/* TOP ROW OF THE LEFT HALF OF THE CARD. CONTAINS THE SPORT ICON AND LEAGUE NAME */}
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: theme.spacing.sm }}>
-                      <SportIcon sport={item.sport} />
-                      <Text
-                        style={{
-                          fontSize: theme.textSize.md,
-                          color: theme.colors.text,
-                          fontWeight: "500",
-                        }}
-                      >
-                        {item.name}
-                      </Text>
-                    </View>
-                    {/* BOTTOM ROW OF THE LEFT HALF OF THE CARD. CONTAINS THE SPORT AND ROLE */}
-                    <Text
-                      style={{
-                        fontSize: theme.textSize.sm,
-                        color: theme.colors.muted,
-                        marginTop: theme.spacing.xs,
-                      }}
-                    >
-                      {item.sport} · {item.role}
-                    </Text>
-                  </View>
-                  {/* RIGHT SIDE OF THE CARD. HAS THE  */}
-                  { (item.role === "OWNER" || item.role === "ADMIN") && (
-                    <Entypo name="edit" size={24} color={theme.colors.text} onPress={() => (
-                      setSelectedLeague(item), setValuesFromLeague(item)
-                    )} />
-                  )}
-                </View>
-              </Card>
-            </Pressable>
-          )}
-        />
-      )}
+					<Input placeholder="Sport" value={createSport} onChangeText={setCreateSport} />
 
-      {fetching == false && (
-        <View>
-          <Text
-            style={{
-              fontSize: theme.textSize.md,
-              color: theme.colors.text,
-              fontWeight: "500",
-              marginBottom: theme.spacing.sm,
-            }}
-          >
-            Create League
-          </Text>
+					<View style={{ height: theme.spacing.md }} />
 
-          <Input
-            placeholder="League name"
-            value={name}
-            onChangeText={setName}
-          />
+					<Button label={creating ? 'Creating...' : 'Create'} onPress={submit} />
+				</View>
+			)}
 
-          <Input
-            placeholder="Sport"
-            value={sport}
-            onChangeText={setSport}
-          />
-
-          <View style={{ height: theme.spacing.md }} />
-
-          <Button label={creating ? "Creating..." : "Create"} onPress={submit} />
-        </View>
-      )}
-
-      <Modal visible={selectedLeague !== null} animationType="slide" transparent={true}>
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <View style={{ width: '90%', backgroundColor: theme.colors.bg, padding: theme.spacing.lg, borderRadius: 8 }}>
-            <Text style={{ fontSize: theme.textSize.md, color: theme.colors.text, fontWeight: "500", marginBottom: theme.spacing.sm }}>
-              Edit League
-            </Text>
-            <Input
-              placeholder="League name"
-              value={name}
-              onChangeText={setName}
-            />
-            <Input
-              placeholder="Sport"
-              value={sport}
-              onChangeText={setSport}
-            />
-            <View style={{ height: theme.spacing.md }} />
-            <Button
-              label="Update League"
-              onPress={async () => {
-                if (selectedLeague) {
-                  await updateLeagueInfo(selectedLeague.id, name, sport);
-                  clearValues();
-                }
-              }}
-            />
-            <View style={{ height: theme.spacing.md }} />
-            <Button
-              label="Cancel"
-              onPress={() => clearValues()}
-            />
-          </View>
-        </View>
-      </Modal>
-    </View>
-  );
+			<Modal visible={selectedLeague !== null} animationType="slide" transparent={true}>
+				<View
+					style={{
+						flex: 1,
+						justifyContent: 'center',
+						alignItems: 'center',
+						backgroundColor: 'rgba(0,0,0,0.5)',
+					}}
+				>
+					<View
+						style={{
+							width: '90%',
+							backgroundColor: theme.colors.bg,
+							padding: theme.spacing.lg,
+							borderRadius: 8,
+						}}
+					>
+						<Text
+							style={{
+								fontSize: theme.textSize.md,
+								color: theme.colors.text,
+								fontWeight: '500',
+								marginBottom: theme.spacing.sm,
+							}}
+						>
+							Edit League
+						</Text>
+						<Input placeholder="League name" value={updateName} onChangeText={setUpdateName} />
+						<Input placeholder="Sport" value={updateSport} onChangeText={setUpdateSport} />
+						<View style={{ height: theme.spacing.md }} />
+						<Button
+							label="Update League"
+							onPress={async () => {
+								if (selectedLeague) {
+									await updateLeague(updateName, updateSport);
+									clearValues();
+								}
+							}}
+						/>
+						<View style={{ height: theme.spacing.md }} />
+						<Button label="Cancel" onPress={() => clearValues()} />
+					</View>
+				</View>
+			</Modal>
+		</View>
+	);
 }

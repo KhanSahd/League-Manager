@@ -1,20 +1,5 @@
+import { Team } from "../../types";
 import { api } from "./client";
-
-/**
- * Team and Player types
- */
-export type Team = {
-  id: string;
-  name: string;
-};
-
-/**
- * Player type
- */
-export type Player = {
-  id: string;
-  name: string;
-};
 
 /**
  * Retrieve teams for a specific league.

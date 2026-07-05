@@ -4,10 +4,19 @@ import { Header } from '../ui/Header';
 import Entypo from '@expo/vector-icons/Entypo';
 import { theme } from '../ui/theme';
 import HomeNavigator from './HomeNavigator';
+import { useEffect } from 'react';
+import { fetchMyLeagues } from '../redux/slices/leaguesSlice';
+import { useAppDispatch } from '../redux/hooks';
+import { NavigationContainer } from '@react-navigation/native';
 
-const TabNavigator = () => {
+const MainAppStack = () => {
 
     const Tabs = createBottomTabNavigator();
+    const dispatch = useAppDispatch()
+
+    useEffect(() => {
+        dispatch(fetchMyLeagues())
+    }, [dispatch])
 
     return (
         <Tabs.Navigator screenOptions={{
@@ -20,14 +29,6 @@ const TabNavigator = () => {
             },
             headerShown: false
         }}>
-            {/* <Tabs.Screen
-                name='home'
-                options={{
-                    header: () => <Header title='Home' />,
-                    tabBarIcon: ({color}) => <Entypo name="home" size={24} color={color} />,
-                }}
-                component={Home}
-            /> */}
             <Tabs.Screen
                 name='Home'
                 component={HomeNavigator}
@@ -39,4 +40,4 @@ const TabNavigator = () => {
     )
 }
 
-export default TabNavigator
+export default MainAppStack

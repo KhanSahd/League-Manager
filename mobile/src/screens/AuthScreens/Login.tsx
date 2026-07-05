@@ -5,20 +5,21 @@ import { theme } from "../../ui/theme";
 import { Input } from "../../ui/Input";
 import { Button } from "../../ui/Button";
 import * as SecureStore from "expo-secure-store";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useDispatch } from "react-redux";
 import { loginSuccess, setToken } from "../../redux/slices/AuthSlice";
-import { AuthResponse, User } from "../../../types";
+import { AuthResponse, RootStackParamList, User } from "../../../types";
 import { useNavigation } from "@react-navigation/native";
+import { useAppDispatch } from "../../redux/hooks";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 export default function Login() {
+  type navigationProp = StackNavigationProp<RootStackParamList>;
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [user, setUser] = useState<User | null>(null); 
-    const dispatch = useDispatch();
-    const navigation = useNavigation();
+    const dispatch = useAppDispatch();
+    const navigation = useNavigation<navigationProp>();
 
     async function submit()
     {

@@ -1,17 +1,19 @@
-import { View, Text, Pressable } from "react-native";
-// import { useAuth } from "../auth/AuthContext";
+import { View, Text } from "react-native";
 import { theme } from "../ui/theme";
-import { Card } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { useNavigation } from "@react-navigation/native";
-import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/slices/AuthSlice";
 import * as SecureStore from "expo-secure-store";
+import { useAppDispatch } from "../redux/hooks";
+import { RootStackParamList } from "../../types";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 export default function Home() {
   // const { user, signOut } = useAuth();
-  const navigation = useNavigation()
-  const dispatch = useDispatch();
+  
+  type navigationProp = StackNavigationProp<RootStackParamList>;
+  const navigation = useNavigation<navigationProp>();
+  const dispatch = useAppDispatch();
 
   async function doLogOut()
   {
