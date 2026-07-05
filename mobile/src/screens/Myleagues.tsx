@@ -1,8 +1,9 @@
-import { View, Text, Pressable, FlatList, TextInput, Modal } from 'react-native';
+import { View, Pressable, FlatList, TextInput, Modal } from 'react-native';
 import { useState } from 'react';
-import { Card } from '../ui/Card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/Card';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
+import { Text } from '../ui/text';
 import { theme } from '../ui/theme';
 import { EmptyState } from '../ui/EmptyState';
 import SportIcon from '../ui/SportIcon';
@@ -18,6 +19,8 @@ import { RootState } from '../redux/store';
 import { League, RootStackParamList } from '../../types';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { THEME } from '@/lib/theme';
+import { Label } from '@/ui/label';
 
 export default function MyLeagues() {
 	// const router = useRouter();
@@ -66,7 +69,7 @@ export default function MyLeagues() {
 				paddingHorizontal: theme.spacing.lg,
 				paddingBottom: theme.spacing.lg,
 				gap: theme.spacing.md,
-				backgroundColor: theme.colors.bg,
+				backgroundColor: THEME.light.background,
 			}}
 		>
 			{useAppSelector((state: RootState) => state.leagues.loading) ? null : leagues?.length ===
@@ -85,51 +88,60 @@ export default function MyLeagues() {
 							}}
 						>
 							<Card>
-								<View
-									style={{
-										flexDirection: 'row',
-										alignItems: 'center',
-										justifyContent: 'space-between',
-									}}
-								>
-									{/* LEFT SIDE OF THE CARD. */}
-									<View style={{ flexDirection: 'column', gap: theme.spacing.xs, flex: 1 }}>
-										{/* TOP ROW OF THE LEFT HALF OF THE CARD. CONTAINS THE SPORT ICON AND LEAGUE NAME */}
-										<View
-											style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}
-										>
-											<SportIcon sport={item.sport} />
-											<Text
+								<CardContent>
+									<View
+										style={{
+											flexDirection: 'row',
+											alignItems: 'center',
+											justifyContent: 'space-between',
+										}}
+									>
+										{/* LEFT SIDE OF THE CARD. */}
+										<View style={{ flexDirection: 'column', gap: theme.spacing.xs, flex: 1 }}>
+											{/* TOP ROW OF THE LEFT HALF OF THE CARD. CONTAINS THE SPORT ICON AND LEAGUE NAME */}
+											<View
 												style={{
-													fontSize: theme.textSize.md,
-													color: theme.colors.text,
-													fontWeight: '500',
+													flexDirection: 'row',
+													alignItems: 'center',
+													gap: theme.spacing.sm,
 												}}
 											>
-												{item.name}
+												<SportIcon sport={item.sport} />
+												<Text
+													style={{
+														fontSize: theme.textSize.md,
+														color: theme.colors.text,
+														fontWeight: '500',
+													}}
+												>
+													{item.name}
+												</Text>
+											</View>
+											{/* BOTTOM ROW OF THE LEFT HALF OF THE CARD. CONTAINS THE SPORT AND ROLE */}
+											<Text
+												style={{
+													fontSize: theme.textSize.sm,
+													color: theme.colors.muted,
+													marginTop: theme.spacing.xs,
+												}}
+											>
+												{item.sport} · {item.role}
 											</Text>
 										</View>
-										{/* BOTTOM ROW OF THE LEFT HALF OF THE CARD. CONTAINS THE SPORT AND ROLE */}
-										<Text
-											style={{
-												fontSize: theme.textSize.sm,
-												color: theme.colors.muted,
-												marginTop: theme.spacing.xs,
-											}}
-										>
-											{item.sport} · {item.role}
-										</Text>
+										{/* RIGHT SIDE OF THE CARD. HAS THE  */}
+										{(item.role === 'OWNER' || item.role === 'ADMIN') && (
+											<Entypo
+												name="edit"
+												size={24}
+												color={theme.colors.text}
+												onPress={() => (
+													dispatch(setSelectedLeague(item)),
+													setValuesFromLeague(item)
+												)}
+											/>
+										)}
 									</View>
-									{/* RIGHT SIDE OF THE CARD. HAS THE  */}
-									{(item.role === 'OWNER' || item.role === 'ADMIN') && (
-										<Entypo
-											name="edit"
-											size={24}
-											color={theme.colors.text}
-											onPress={() => (dispatch(setSelectedLeague(item)), setValuesFromLeague(item))}
-										/>
-									)}
-								</View>
+								</CardContent>
 							</Card>
 						</Pressable>
 					)}
@@ -137,8 +149,11 @@ export default function MyLeagues() {
 			)}
 
 			{useAppSelector((state: RootState) => !state.leagues.loading) && (
-				<View>
-					<Text
+				<Card>
+					<CardHeader>
+						<CardTitle>Create League</CardTitle>
+					</CardHeader>
+					{/* <Text
 						style={{
 							fontSize: theme.textSize.md,
 							color: theme.colors.text,
@@ -147,16 +162,31 @@ export default function MyLeagues() {
 						}}
 					>
 						Create League
-					</Text>
-
-					<Input placeholder="League name" value={createName} onChangeText={setCreateName} />
-
-					<Input placeholder="Sport" value={createSport} onChangeText={setCreateSport} />
-
-					<View style={{ height: theme.spacing.md }} />
-
-					<Button label={creating ? 'Creating...' : 'Create'} onPress={submit} />
-				</View>
+					</Text> */}
+					<CardContent>
+						<View className="gap-5">
+							<Label htmlFor="leagueName">League Name</Label>
+							<Input
+								id="leagueName"
+								placeholder="League name"
+								value={createName}
+								onChangeText={setCreateName}
+							/>
+							<Label htmlFor="sport">Sport</Label>
+							<Input
+								id="sport"
+								placeholder="Sport"
+								value={createSport}
+								onChangeText={setCreateSport}
+							/>
+						</View>
+					</CardContent>
+					<CardFooter className="flex-col gap-2">
+						<Button variant={'default'} onPress={submit} className="w-full">
+							<Text>{creating ? 'Creating...' : 'Create'}</Text>
+						</Button>
+					</CardFooter>
+				</Card>
 			)}
 
 			<Modal visible={selectedLeague !== null} animationType="slide" transparent={true}>
@@ -190,16 +220,19 @@ export default function MyLeagues() {
 						<Input placeholder="Sport" value={updateSport} onChangeText={setUpdateSport} />
 						<View style={{ height: theme.spacing.md }} />
 						<Button
-							label="Update League"
 							onPress={async () => {
 								if (selectedLeague) {
 									await updateLeague(updateName, updateSport);
 									clearValues();
 								}
 							}}
-						/>
+						>
+							<Text>Update League</Text>
+						</Button>
 						<View style={{ height: theme.spacing.md }} />
-						<Button label="Cancel" onPress={() => clearValues()} />
+						<Button variant={'secondary'} onPress={() => clearValues()}>
+							<Text>Cancel</Text>
+						</Button>
 					</View>
 				</View>
 			</Modal>

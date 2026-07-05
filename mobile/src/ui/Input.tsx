@@ -1,52 +1,29 @@
-import { View, TextInput, Pressable } from "react-native";
-import { theme } from "./theme";
-import Entypo from "@expo/vector-icons/Entypo";
-import { useState } from "react";
+import { cn } from '@/lib/utils';
+import { Platform, TextInput } from 'react-native';
 
-type InputProps = {
-  secureTextEntry?: boolean;
-  [key: string]: any;
-};
-
-export function Input({ secureTextEntry, ...props }: InputProps) {
-  const [hidden, setHidden] = useState(secureTextEntry ?? false);
-
+function Input({ className, ...props }: React.ComponentProps<typeof TextInput> & React.RefAttributes<TextInput>) {
   return (
-    <View
-      style={{
-        position: "relative",
-        justifyContent: "center",
-      }}
-    >
-      <TextInput
-        {...props}
-        secureTextEntry={hidden}
-        placeholderTextColor={theme.colors.muted}
-        style={{
-          borderWidth: 1,
-          borderColor: theme.colors.border,
-          padding: theme.spacing.md,
-          paddingRight: secureTextEntry ? 44 : theme.spacing.md,
-          borderRadius: theme.radius.md,
-          color: theme.colors.text,
-        }}
-      />
-
-      {secureTextEntry && (
-        <Pressable
-          onPress={() => setHidden(!hidden)}
-          style={{
-            position: "absolute",
-            right: theme.spacing.md,
-          }}
-        >
-          <Entypo
-            name={hidden ? "eye-with-line" : "eye"}
-            size={20}
-            color={theme.colors.muted}
-          />
-        </Pressable>
+    <TextInput
+      className={cn(
+        'dark:bg-input/30 border-input bg-background text-foreground flex h-10 w-full min-w-0 flex-row items-center rounded-md border px-3 py-1 text-base leading-5 shadow-sm shadow-black/5 sm:h-9',
+        props.editable === false &&
+        cn(
+          'opacity-50',
+          Platform.select({ web: 'disabled:pointer-events-none disabled:cursor-not-allowed' })
+        ),
+        Platform.select({
+          web: cn(
+            'placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground outline-none transition-[color,box-shadow] md:text-sm',
+            'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+            'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive'
+          ),
+          native: 'placeholder:text-muted-foreground/50',
+        }),
+        className
       )}
-    </View>
+      {...props}
+    />
   );
 }
+
+export { Input };

@@ -1,78 +1,77 @@
-import { View, Text } from "react-native";
-import { theme } from "../ui/theme";
-import { Button } from "../ui/Button";
-import { useNavigation } from "@react-navigation/native";
-import { logout } from "../redux/slices/AuthSlice";
-import * as SecureStore from "expo-secure-store";
-import { useAppDispatch } from "../redux/hooks";
-import { RootStackParamList } from "../../types";
-import { StackNavigationProp } from "@react-navigation/stack";
+import { View } from 'react-native';
+import { Text } from '../ui/text';
+import { theme } from '../ui/theme';
+import { Button } from '../ui/Button';
+import { useNavigation } from '@react-navigation/native';
+import { logout } from '../redux/slices/AuthSlice';
+import * as SecureStore from 'expo-secure-store';
+import { useAppDispatch } from '../redux/hooks';
+import { RootStackParamList } from '../../types';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { THEME } from '@/lib/theme';
 
 export default function Home() {
-  // const { user, signOut } = useAuth();
-  
-  type navigationProp = StackNavigationProp<RootStackParamList>;
-  const navigation = useNavigation<navigationProp>();
-  const dispatch = useAppDispatch();
+	// const { user, signOut } = useAuth();
 
-  async function doLogOut()
-  {
-    await SecureStore.deleteItemAsync("token");
-    dispatch(logout())
-  }
+	type navigationProp = StackNavigationProp<RootStackParamList>;
+	const navigation = useNavigation<navigationProp>();
+	const dispatch = useAppDispatch();
 
-  return (
-    <View style={{ backgroundColor: theme.colors.bg, flex: 1, padding: 20, gap: 12 }}>
-      <Text
-        style={{
-          fontSize: theme.textSize.md,
-          color: theme.colors.text,
-          fontWeight: "500",
-        }}
-      >
-        {/* Welcome {user?.firstName + " " + user?.lastName} */}
-        Welcome Sahd Khan
-      </Text>
+	async function doLogOut() {
+		await SecureStore.deleteItemAsync('token');
+		dispatch(logout());
+	}
 
-      <View
-        style={{padding: theme.spacing.md}}
-      >
-        <Text
-          style={{
-            fontSize: theme.textSize.lg,
-            color: theme.colors.text,
-            fontWeight: "500",
-            marginBottom: theme.spacing.sm,
-          }}
-        >
-          Leagues
-        </Text>
+	return (
+		<View style={{ backgroundColor: THEME.light.background, flex: 1, padding: 20, gap: 12 }}>
+			<Text
+			// style={{
+			// 	fontSize: theme.textSize.md,
+			// 	color: theme.colors.text,
+			// 	fontWeight: '500',
+			// }}
+			>
+				{/* Welcome {user?.firstName + " " + user?.lastName} */}
+				Welcome Sahd Khan
+			</Text>
 
-        <View style={{
-          flexDirection: "column",
-          gap: "15"
-        }}>
-          <Button
-            label="Join Leagues"
-            onPress={() => {
-              navigation.navigate("Join Leagues")
-            }}
-          />
+			<View style={{ padding: theme.spacing.md }}>
+				<Text
+					style={{
+						fontSize: theme.textSize.lg,
+						color: theme.colors.text,
+						fontWeight: '500',
+						marginBottom: theme.spacing.sm,
+					}}
+				>
+					Leagues
+				</Text>
 
-          <Button
-            label="View My Leagues"
-            onPress={() => navigation.navigate( "MyLeagues" )}
-          />
-        </View>
-      </View>
+				<View
+					style={{
+						flexDirection: 'column',
+						gap: '15',
+					}}
+				>
+					<Button
+						onPress={() => {
+							navigation.navigate('Join Leagues');
+						}}
+					>
+						<Text>Join Leagues</Text>
+					</Button>
 
-      <View style={{ marginTop: "auto" }}>
-        <Button
-          label="Logout"
-          onPress={() => doLogOut()}
-          variant="danger"
-        />
-      </View>
-    </View>
-  );
+					<Button onPress={() => navigation.navigate('MyLeagues')}>
+						<Text>View My Leagues</Text>
+					</Button>
+				</View>
+			</View>
+
+			<View style={{ marginTop: 'auto' }}>
+				<Button variant={'destructive'} onPress={() => doLogOut()}>
+					<Text>Logout</Text>
+				</Button>
+			</View>
+		</View>
+	);
 }

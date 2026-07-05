@@ -3,11 +3,19 @@ import Login from '../screens/AuthScreens/Login';
 import Register from '../screens/AuthScreens/Register';
 import ForgotPassword from '../screens/AuthScreens/ForgotPassword';
 import { Header } from '../ui/Header';
+import WelcomeScreen from '@/screens/AuthScreens/WelcomeScreen';
 
 const AuthStack = () => {
 	const Stack = createStackNavigator();
 	return (
 		<Stack.Navigator>
+			<Stack.Screen
+				name="Welcome"
+				component={WelcomeScreen}
+				options={{
+					headerShown: false,
+				}}
+			/>
 			<Stack.Screen
 				name="Login"
 				component={Login}
