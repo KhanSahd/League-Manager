@@ -10,4 +10,5 @@ import java.util.UUID;
 public interface LeagueMemberRepository extends JpaRepository<LeagueMember, UUID> {
     List<LeagueMember> findByUser(User user);
     Optional<LeagueMember> findByLeagueAndUser( League leagueId, User user);
+    void deleteByLeague(League league);
 }

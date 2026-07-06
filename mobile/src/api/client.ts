@@ -9,6 +9,7 @@ async function getToken() {
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
 	const token = await getToken();
 
+	console.log(`Making request to ${BASE_URL}${path} with options: ${JSON.stringify(options)}`);
 	const res = await fetch(`${BASE_URL}${path}`, {
 		...options,
 		headers: {

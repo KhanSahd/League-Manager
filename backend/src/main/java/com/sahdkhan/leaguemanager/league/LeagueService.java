@@ -1,8 +1,11 @@
 package com.sahdkhan.leaguemanager.league;
 
 import com.sahdkhan.leaguemanager.exceptions.ForbiddenException;
+import com.sahdkhan.leaguemanager.sports.Sport;
+import com.sahdkhan.leaguemanager.sports.SportRepository;
 import com.sahdkhan.leaguemanager.user.User;
 import com.sahdkhan.leaguemanager.user.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +21,7 @@ public class LeagueService
     private final LeagueRepository leagues;
     private final LeagueMemberRepository members;
     private final UserRepository users;
+    private final SportRepository sports;
 
     /**
      * Constructs a LeagueService with the given repositories.
@@ -29,12 +33,14 @@ public class LeagueService
     public LeagueService(
             LeagueRepository leagues,
             LeagueMemberRepository members,
-            UserRepository users
+            UserRepository users,
+            SportRepository sports
     )
     {
         this.leagues = leagues;
         this.members = members;
         this.users = users;
+        this.sports = sports;
     }
 
     /**
@@ -68,12 +74,13 @@ public class LeagueService
      *
      * @param userId the ID of the user creating the league
      * @param name   the name of the league
-     * @param sport  the sport of the league
+     * @param sportId  the sport of the league
      * @return the created league
      */
-    public League createLeague( UUID userId, String name, String sport )
+    public League createLeague( UUID userId, String name, UUID sportId )
     {
         User owner = users.findById( userId ).orElseThrow();
+        Sport sport = sports.findById( sportId ).orElseThrow();
         League league = leagues.save( new League( name, sport ) );
         members.save( new LeagueMember( owner, league, LeagueRole.OWNER ) );
         return league;
@@ -84,17 +91,29 @@ public class LeagueService
      *
      * @param leagueId the ID of the league to update
      * @param name     the new name of the league
-     * @param sport    the new sport of the league
+     * @param sportId    the new sport of the league
      * @return the updated league
      */
-    public League updateLeague( UUID leagueId, String name, String sport, UUID userId )
+    public League updateLeague( UUID leagueId, String name, UUID sportId, UUID userId )
     {
         User user = users.findById( userId ).orElseThrow();
         League league = leagues.findById( leagueId ).orElseThrow();
+        Sport sport = sports.findById( sportId ).orElseThrow();
         requireAdmin( league, user );
         league.setName( name );
         league.setSport( sport );
         return leagues.save( league );
+    }
+
+    @Transactional
+    public League deleteLeague( UUID leagueId, UUID userId )
+    {
+        User user = users.findById( userId ).orElseThrow();
+        League league = leagues.findById( leagueId ).orElseThrow();
+        requireAdmin( league, user );
+        members.deleteByLeague( league );
+        leagues.delete( league );
+        return league;
     }
 
     /**

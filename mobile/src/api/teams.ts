@@ -1,5 +1,5 @@
-import { Team } from "../../types";
-import { api } from "./client";
+import { Player, Team } from '../../types';
+import { api } from './client';
 
 /**
  * Retrieve teams for a specific league.
@@ -7,7 +7,7 @@ import { api } from "./client";
  * @returns A promise that resolves to an array of teams.
  */
 export async function getTeams(leagueId: string): Promise<Team[]> {
-  return api<Team[]>(`/teams/league/${leagueId}`);
+	return api<Team[]>(`/teams/league/${leagueId}`);
 }
 
 /**
@@ -17,10 +17,10 @@ export async function getTeams(leagueId: string): Promise<Team[]> {
  * @returns A promise that resolves to the created team.
  */
 export async function createTeam(leagueId: string, name: string): Promise<Team> {
-  return api<Team>(`/teams/league/${leagueId}`, {
-    method: "POST",
-    body: JSON.stringify({ name }),
-  });
+	return api<Team>(`/teams/league/${leagueId}`, {
+		method: 'POST',
+		body: JSON.stringify({ name }),
+	});
 }
 
 /**
@@ -29,7 +29,7 @@ export async function createTeam(leagueId: string, name: string): Promise<Team> 
  * @returns A promise that resolves to an array of players.
  */
 export async function getPlayers(teamId: string): Promise<Player[]> {
-  return api<Player[]>(`/teams/${teamId}/players`);
+	return api<Player[]>(`/teams/${teamId}/players`);
 }
 
 /**
@@ -39,10 +39,10 @@ export async function getPlayers(teamId: string): Promise<Player[]> {
  * @returns A promise that resolves to the created player.
  */
 export async function addPlayer(teamId: string, name: string): Promise<Player> {
-  return api<Player>(`/teams/${teamId}/players`, {
-    method: "POST",
-    body: JSON.stringify({ name }),
-  });
+	return api<Player>(`/teams/${teamId}/players`, {
+		method: 'POST',
+		body: JSON.stringify({ name }),
+	});
 }
 
 /**
@@ -52,9 +52,9 @@ export async function addPlayer(teamId: string, name: string): Promise<Player> {
  * @returns A promise that resolves when the player is deleted.
  */
 export async function removePlayer(teamId: string, playerId: string): Promise<void> {
-  return api<void>(`/teams/${teamId}/players/${playerId}`, {
-    method: "DELETE",
-  });
+	return api<void>(`/teams/${teamId}/players/${playerId}`, {
+		method: 'DELETE',
+	});
 }
 
 /**
@@ -63,7 +63,7 @@ export async function removePlayer(teamId: string, playerId: string): Promise<vo
  * @returns A promise that resolves when the team is deleted.
  */
 export async function deleteTeam(teamId: string): Promise<void> {
-  return api<void>(`/teams/${teamId}`, {
-    method: "DELETE",
-  });
+	return api<void>(`/teams/${teamId}`, {
+		method: 'DELETE',
+	});
 }

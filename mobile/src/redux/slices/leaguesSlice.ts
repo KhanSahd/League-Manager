@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { api } from '../../api/client';
-import { createLeague, getMyLeagues, updateLeague } from '../../api/league';
-import { League, LeagueState, Team, UpdateLeagueRequest } from '../../../types';
+import { createLeague, deleteLeague, getMyLeagues, updateLeague } from '../../api/league';
+import { League, LeagueState, Sport, Team, UpdateLeagueRequest } from '../../../types';
 import { RootState } from '../store';
 
 export const fetchMyLeagues = createAsyncThunk<League[], void, { rejectValue: string }>(
@@ -28,36 +28,36 @@ export const updateLeagueInfo = createAsyncThunk<
 	return thunkAPI.rejectWithValue('League not found');
 });
 
-// export const fetchTeamsForLeague = createAsyncThunk<Team[] | null, null, {state: RootState} >(
-//     "leagues/fetchTeamsForLeague",
-//     async ( _, thunkAPI) => {
-//         const id = thunkAPI.getState().leagues.selectedLeague?.id;
-//         if (id)
-//         {
-//             const data = await getTeams(id);
-//             return data;
-//         }
-//         return null;
-//     }
-// )
-
 export const createNewLeague = createAsyncThunk<
 	League,
-	{ name: string; sport: string },
+	{ name: string; sport: Sport },
 	{ state: RootState; rejectValue: string }
 >('leagues/createLeague', async (leagueData, thunkAPI) => {
 	try {
 		const data = await createLeague(leagueData.name, leagueData.sport);
+		console.log(data.name, data.sport);
 		return data;
 	} catch (error: any) {
 		return thunkAPI.rejectWithValue(error.message ?? 'Failed to create league');
 	}
 });
 
+export const doDeleteLeague = createAsyncThunk<
+	League,
+	string,
+	{ state: RootState; rejectValue: string }
+>('leagues/deleteLeague', async (leagueId, thunkAPI) => {
+	try {
+		const data = await deleteLeague(leagueId);
+		return data;
+	} catch (error: any) {
+		return thunkAPI.rejectWithValue(error.message ?? 'Failed to delete league');
+	}
+});
+
 const initialState: LeagueState = {
 	leagues: null,
 	selectedLeague: null,
-	// editingLeague: null,
 	loading: false,
 	error: null,
 };
@@ -122,6 +122,14 @@ const leaguesSlice = createSlice({
 			.addCase(createNewLeague.rejected, (state, action) => {
 				state.loading = false;
 				state.error = action.payload ?? 'Failed to create league';
+			})
+			.addCase(doDeleteLeague.fulfilled, (state, action: PayloadAction<League>) => {
+				state.loading = false;
+				state.leagues = state.leagues?.filter((l) => l.id !== action.payload.id) || null;
+			})
+			.addCase(doDeleteLeague.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload ?? 'Failed to delete league';
 			});
 	},
 });

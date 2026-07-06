@@ -3,6 +3,7 @@ import darkModeReducer from './slices/darkModeSlice';
 import authReducer from './slices/AuthSlice';
 import leaguesReducer from './slices/leaguesSlice';
 import teamsReducer from './slices/TeamsSlice';
+import sportsReducer from './slices/SportsSlice';
 
 export const store = configureStore({
 	reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
 		auth: authReducer,
 		leagues: leaguesReducer,
 		teams: teamsReducer,
+		sports: sportsReducer,
 	},
 });
 
