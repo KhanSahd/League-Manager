@@ -1,12 +1,19 @@
 import { View, Pressable, FlatList, TextInput, Modal } from 'react-native';
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/Card';
-import { Input } from '../ui/Input';
-import { Button } from '../ui/Button';
-import { Text } from '../ui/text';
-import { theme } from '../ui/theme';
-import { EmptyState } from '../ui/EmptyState';
-import SportIcon from '../ui/SportIcon';
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from '../../ui/Card';
+import { Input } from '../../ui/Input';
+import { Button } from '../../ui/Button';
+import { Text } from '../../ui/text';
+import { theme } from '../../ui/theme';
+import { EmptyState } from '../../ui/EmptyState';
+import SportIcon from '../../ui/SportIcon';
 import Entypo from '@expo/vector-icons/Entypo';
 import { useNavigation } from '@react-navigation/native';
 import {
@@ -15,10 +22,10 @@ import {
 	doDeleteLeague,
 	setSelectedLeague,
 	updateLeagueInfo,
-} from '../redux/slices/leaguesSlice';
-import { RootState } from '../redux/store';
-import { League, RootStackParamList, Sport } from '../../types';
-import { useAppDispatch, useAppSelector } from '../redux/hooks';
+} from '../../redux/slices/leaguesSlice';
+import { RootState } from '../../redux/store';
+import { League, RootStackParamList, Sport } from '../../../types';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { THEME } from '@/lib/theme';
 import { Label } from '@/ui/label';
