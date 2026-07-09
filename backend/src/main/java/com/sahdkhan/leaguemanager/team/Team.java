@@ -19,6 +19,7 @@ public class Team {
     private String name;
 
     @ManyToOne(optional = false)
+    @JoinColumn(name = "league_id", nullable = false)
     private League league;
 
     protected Team() {}

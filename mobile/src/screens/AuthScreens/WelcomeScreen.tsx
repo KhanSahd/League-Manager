@@ -29,6 +29,7 @@ const WelcomeScreen = () => {
 			<Button
 				style={{ borderRadius: 25 }}
 				className="w-4/5 mt-5 items-center justify-content"
+				variant={'default'}
 				onPress={() => navigate.navigate('Login')}
 			>
 				<Text>Login</Text>

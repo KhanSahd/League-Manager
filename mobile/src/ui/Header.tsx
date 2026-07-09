@@ -66,11 +66,6 @@ export function Header({ title }: { title: string }) {
 
 					<Text>{title}</Text>
 				</View>
-				{(navigation.canGoBack() || isHome()) && (
-					<Pressable>
-						<Entypo name="menu" size={24} color={theme.colors.text} />
-					</Pressable>
-				)}
 			</View>
 		</View>
 	);

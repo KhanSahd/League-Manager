@@ -101,7 +101,7 @@ export default function Login() {
 						variant={'secondary'}
 						className="w-full"
 					>
-						<Text>"Don't have an account? Register"</Text>
+						<Text>Don't have an account? Register</Text>
 					</Button>
 					<Button
 						onPress={() => navigation.navigate('Forgot-Password')}

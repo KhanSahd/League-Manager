@@ -16,9 +16,11 @@ public class LeagueMember {
     private UUID id;
 
     @ManyToOne(optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne(optional = false)
+    @JoinColumn(name = "league_id", nullable = false)
     private League league;
 
     @Enumerated(EnumType.STRING)
