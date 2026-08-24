@@ -15,12 +15,6 @@ public class SportService
         this.sports = sports;
     }
 
-    public Sport addSport(String nameOfSport)
-    {
-        Sport sport = new Sport(nameOfSport);
-        return sports.save(sport);
-    }
-
     public List<Sport> getAllSports()
     {
         return sports.findAll();

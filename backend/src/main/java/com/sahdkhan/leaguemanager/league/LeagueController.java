@@ -2,7 +2,9 @@ package com.sahdkhan.leaguemanager.league;
 
 import com.sahdkhan.leaguemanager.config.JwtAuthFilter.AuthPrincipal;
 import com.sahdkhan.leaguemanager.sports.Sport;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +29,7 @@ public class LeagueController {
      */
     public record CreateLeagueRequest(
             @NotBlank String name,
-            @NotBlank UUID sportId
+            @NotNull UUID sportId
     ) {}
 
     /**
@@ -37,24 +39,26 @@ public class LeagueController {
      * @param sportId the new sport id for the league
      */
     public record UpdateLeagueRequest( String name, UUID sportId ) {}
-    public record LeagueResponse( UUID id, String name, Sport sport, LeagueRole role) {}
+    public record SportResponse( UUID id, String name ) {}
+    public record LeagueResponse( UUID id, String name, SportResponse sport, LeagueRole role) {}
+
+    private LeagueResponse toResponse(League league, LeagueRole role) {
+        Sport sport = league.getSport();
+        SportResponse sportResponse = sport == null ? null : new SportResponse(sport.getId(), sport.getName());
+        return new LeagueResponse(league.getId(), league.getName(), sportResponse, role);
+    }
 
     @PostMapping
     public LeagueResponse create(
             @AuthenticationPrincipal AuthPrincipal principal,
-            @RequestBody CreateLeagueRequest req
+            @Valid @RequestBody CreateLeagueRequest req
     ) {
         League league = leagues.createLeague(
                 principal.userId(),
                 req.name(),
                 req.sportId()
         );
-        return new LeagueResponse(
-                league.getId(),
-                league.getName(),
-                league.getSport(),
-                LeagueRole.OWNER
-        );
+        return toResponse(league, LeagueRole.OWNER);
     }
 
     @PutMapping("/{leagueId}")
@@ -64,14 +68,9 @@ public class LeagueController {
             @AuthenticationPrincipal AuthPrincipal principal
     )
     {
-        leagues.updateLeague( leagueId, req.name(), req.sportId(), principal.userId());
-        League league = leagues.getLeagueById( leagueId );
-        return new LeagueResponse(
-                league.getId(),
-                league.getName(),
-                league.getSport(),
-                LeagueRole.OWNER
-        );
+        League league = leagues.updateLeague( leagueId, req.name(), req.sportId(), principal.userId());
+        LeagueRole role = leagues.getRole( leagueId, principal.userId() );
+        return toResponse(league, role);
     }
 
     @GetMapping("/mine")
@@ -80,12 +79,7 @@ public class LeagueController {
     ) {
         return leagues.myLeagues(principal.userId())
                 .stream()
-                .map(m -> new LeagueResponse(
-                        m.getLeague().getId(),
-                        m.getLeague().getName(),
-                        m.getLeague().getSport() != null ? m.getLeague().getSport() : null,
-                        m.getRole()
-                ))
+                .map(m -> toResponse(m.getLeague(), m.getRole()))
                 .toList();
     }
 
@@ -95,14 +89,9 @@ public class LeagueController {
             @AuthenticationPrincipal AuthPrincipal principal
     )
     {
-        League league = leagues.getLeagueById( leagueId );
-        leagues.deleteLeague( leagueId, principal.userId() );
-        return new LeagueResponse(
-                league.getId(),
-                league.getName(),
-                league.getSport(),
-                LeagueRole.OWNER
-        );
+        LeagueRole role = leagues.getRole( leagueId, principal.userId() );
+        League league = leagues.deleteLeague( leagueId, principal.userId() );
+        return toResponse(league, role);
     }
 
 

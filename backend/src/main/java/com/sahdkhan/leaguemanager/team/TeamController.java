@@ -2,6 +2,8 @@ package com.sahdkhan.leaguemanager.team;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import com.sahdkhan.leaguemanager.config.JwtAuthFilter.AuthPrincipal;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,15 +19,15 @@ public class TeamController {
         this.teams = teams;
     }
 
-    record CreateTeamRequest(String name) {}
+    record CreateTeamRequest(@NotBlank String name) {}
     record TeamResponse(UUID id, String name) {}
-    record CreatePlayerRequest(String name) {}
+    record CreatePlayerRequest(@NotBlank String name) {}
     record PlayerResponse(UUID id, String name) {}
 
     @PostMapping("/league/{leagueId}")
     public TeamResponse createTeam(
             @PathVariable UUID leagueId,
-            @RequestBody CreateTeamRequest req,
+            @Valid @RequestBody CreateTeamRequest req,
             @AuthenticationPrincipal AuthPrincipal principal
     ) {
         Team team = teams.createTeam(leagueId, req.name(), principal.userId() );
@@ -33,8 +35,11 @@ public class TeamController {
     }
 
     @GetMapping("/league/{leagueId}")
-    public List<TeamResponse> teams(@PathVariable UUID leagueId) {
-        return teams.getTeams(leagueId)
+    public List<TeamResponse> teams(
+            @PathVariable UUID leagueId,
+            @AuthenticationPrincipal AuthPrincipal principal
+    ) {
+        return teams.getTeams(leagueId, principal.userId())
                 .stream()
                 .map(t -> new TeamResponse(t.getId(), t.getName()))
                 .toList();
@@ -43,7 +48,7 @@ public class TeamController {
     @PostMapping("/{teamId}/players")
     public PlayerResponse addPlayer(
             @PathVariable UUID teamId,
-            @RequestBody CreatePlayerRequest req,
+            @Valid @RequestBody CreatePlayerRequest req,
             @AuthenticationPrincipal AuthPrincipal principal
     ) {
         Player p = teams.addPlayer(teamId, req.name(), principal.userId());
@@ -51,8 +56,11 @@ public class TeamController {
     }
 
     @GetMapping("/{teamId}/players")
-    public List<PlayerResponse> players(@PathVariable UUID teamId) {
-        return teams.getPlayers(teamId)
+    public List<PlayerResponse> players(
+            @PathVariable UUID teamId,
+            @AuthenticationPrincipal AuthPrincipal principal
+    ) {
+        return teams.getPlayers(teamId, principal.userId())
                 .stream()
                 .map(p -> new PlayerResponse(p.getId(), p.getName()))
                 .toList();

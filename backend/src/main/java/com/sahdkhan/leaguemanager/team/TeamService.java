@@ -7,6 +7,7 @@ import com.sahdkhan.leaguemanager.user.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -14,6 +15,9 @@ import java.util.UUID;
  */
 @Service
 public class TeamService {
+
+    /** Roles that may create, update, or delete resources within a league. */
+    private static final Set<LeagueRole> ADMIN_ROLES = Set.of(LeagueRole.OWNER, LeagueRole.ADMIN);
 
     private final TeamRepository teams;
     private final PlayerRepository players;
@@ -49,7 +53,7 @@ public class TeamService {
 
     private void requireAdmin(League league, User user) {
         LeagueMember m = requireMembership(league, user);
-        if (m.getRole() == LeagueRole.MEMBER) {
+        if (!ADMIN_ROLES.contains(m.getRole())) {
             throw new ForbiddenException("Insufficient privileges");
         }
     }
@@ -79,8 +83,9 @@ public class TeamService {
      * @param leagueId the ID of the league
      * @return the list of teams in the league
      */
-    public List<Team> getTeams(UUID leagueId) {
+    public List<Team> getTeams(UUID leagueId, UUID userId) {
         League league = leagues.findById(leagueId).orElseThrow();
+        requireMembership( league, getUser( userId ) );
         return teams.findByLeague(league);
     }
 
@@ -103,8 +108,9 @@ public class TeamService {
      * @param teamId the ID of the team
      * @return the list of players in the team
      */
-    public List<Player> getPlayers(UUID teamId) {
+    public List<Player> getPlayers(UUID teamId, UUID userId) {
         Team team = teams.findById(teamId).orElseThrow();
+        requireMembership( team.getLeague(), getUser( userId ) );
         return players.findByTeam(team);
     }
 
