@@ -1,0 +1,16 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+
+app:
+  jwt:
+    secret: "test-secret-test-secret-test-secret-test-secret-32bytes-min"
+    expirationMinutes: 10080
+
+resend:
+  api:
+    key: "test-key"

@@ -18,6 +18,16 @@ repositories {
 	mavenCentral()
 }
 
+ext {
+	set('testcontainersVersion', "1.20.4")
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.testcontainers:testcontainers-bom:${testcontainersVersion}"
+	}
+}
+
 dependencies {
     // Spring Boot dependencies
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -41,15 +51,13 @@ dependencies {
     runtimeOnly  'io.jsonwebtoken:jjwt-jackson:0.12.5'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-
-
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
-}
-
-tasks.withType(Test).configureEach {
-    enabled = false
 }
 
