@@ -1,4 +1,4 @@
-import { View, Pressable, FlatList, TextInput, Modal } from 'react-native';
+import { View, Pressable, FlatList, Modal } from 'react-native';
 import { useState } from 'react';
 import {
 	Card,
@@ -24,7 +24,7 @@ import {
 	updateLeagueInfo,
 } from '../../redux/slices/leaguesSlice';
 import { RootState } from '../../redux/store';
-import { League, RootStackParamList, Sport } from '../../../types';
+import { League, LeaguesStackParamList, Sport } from '../../../types';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { THEME } from '@/lib/theme';
@@ -33,7 +33,7 @@ import Sports from '@/ui/Sports';
 
 export default function MyLeagues() {
 	// const router = useRouter();
-	type navigationProp = StackNavigationProp<RootStackParamList>;
+	type navigationProp = StackNavigationProp<LeaguesStackParamList>;
 	const nav = useNavigation<navigationProp>();
 
 	const leagues = useAppSelector((state: RootState) => state.leagues.leagues);
@@ -261,7 +261,7 @@ export default function MyLeagues() {
 										<Text className="text-sm text-muted-foreground">
 											This action cannot be undone.
 										</Text>
-										<Text className="text-sm text-muted-foreground">Type "DELETE" to confirm:</Text>
+										<Text className="text-sm text-muted-foreground">Type &quot;DELETE&quot; to confirm:</Text>
 									</View>
 								</CardDescription>
 								<CardContent>

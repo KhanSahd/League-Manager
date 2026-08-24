@@ -1,7 +1,6 @@
 import { View, Pressable } from 'react-native';
 import { theme } from './theme';
 import { useNavigation } from '@react-navigation/native';
-import Entypo from '@expo/vector-icons/Entypo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { THEME } from '@/lib/theme';
 import { Text } from './text';
@@ -9,17 +8,6 @@ import { Text } from './text';
 export function Header({ title }: { title: string }) {
 	const insets = useSafeAreaInsets();
 	const navigation = useNavigation();
-
-	/**
-	 * Checks if the current page is the home page.
-	 * Useful for rendering the hamburger on the homescreen since
-	 * technically on the homescreen we cannot go back and therefore the
-	 * menu icon would not be displayed.
-	 * @returns boolean indicating true or false if on home screen or not.
-	 */
-	function isHome(): boolean {
-		return title.toLowerCase() == 'home';
-	}
 
 	return (
 		<View

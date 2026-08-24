@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { api } from '../../api/client';
 import { createLeague, deleteLeague, getMyLeagues, updateLeague } from '../../api/league';
-import { League, LeagueState, Sport, Team, UpdateLeagueRequest } from '../../../types';
+import { League, LeagueState, Sport, UpdateLeagueRequest } from '../../../types';
 import { RootState } from '../store';
 
 export const fetchMyLeagues = createAsyncThunk<League[], void, { rejectValue: string }>(

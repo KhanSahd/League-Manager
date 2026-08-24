@@ -16,19 +16,16 @@ export default function ForgotPassword() {
 
 	async function handleResetPassword() {
 		setError(null);
-		console.log(email);
 		try {
 			const res = await api<{ message: string }>('/password-reset/forgot-password', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ email }),
 			});
-			console.log('API RESPONSE:', res);
 			Alert.alert(res.message);
 			navigation.dispatch(StackActions.replace('Login'));
 			return;
 		} catch (e: any) {
-			console.log('RESET ERROR:', e);
 			setError(e.message);
 		}
 	}
@@ -43,6 +40,10 @@ export default function ForgotPassword() {
 				gap: theme.spacing.md,
 			}}
 		>
+			{error && (
+				<Text style={{ color: theme.colors.error }}>{error}</Text>
+			)}
+
 			<Input placeholder="Email" autoCapitalize="none" value={email} onChangeText={setEmail} />
 
 			<Button onPress={handleResetPassword}>

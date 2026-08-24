@@ -4,9 +4,10 @@ import Register from '../screens/AuthScreens/Register';
 import ForgotPassword from '../screens/AuthScreens/ForgotPassword';
 import { Header } from '../ui/Header';
 import WelcomeScreen from '@/screens/AuthScreens/WelcomeScreen';
+import { AuthStackParamList } from '../../types';
 
 const AuthStack = () => {
-	const Stack = createStackNavigator();
+	const Stack = createStackNavigator<AuthStackParamList>();
 	return (
 		<Stack.Navigator>
 			<Stack.Screen

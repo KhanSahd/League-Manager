@@ -5,12 +5,16 @@ import { theme } from '@/ui/theme';
 import { Button } from '@/ui/Button';
 import { Text } from '@/ui/text';
 import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { LeaguesStackParamList } from '../../../types';
+import { useAppSelector } from '@/redux/hooks';
 
 const LeaguesScreen = () => {
-	const navigation = useNavigation();
+	const navigation = useNavigation<StackNavigationProp<LeaguesStackParamList>>();
+	const user = useAppSelector((state) => state.auth.user);
 	return (
 		<View style={{ backgroundColor: THEME.light.background, flex: 1, padding: 20, gap: 12 }}>
-			<Text>Welcome Sahd Khan</Text>
+			<Text>Welcome{user ? `, ${user.firstName}` : ''}</Text>
 
 			<View style={{ padding: theme.spacing.md }}>
 				<Text

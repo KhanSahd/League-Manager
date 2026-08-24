@@ -1,30 +1,30 @@
 import { View } from 'react-native';
 import { Text } from '../ui/text';
-import { theme } from '../ui/theme';
 import { Button } from '../ui/Button';
 import { useNavigation } from '@react-navigation/native';
-import { logout } from '../redux/slices/AuthSlice';
-import * as SecureStore from 'expo-secure-store';
-import { useAppDispatch } from '../redux/hooks';
-import { RootStackParamList } from '../../types';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
+import { useAppSelector } from '../redux/hooks';
+import { DrawerParamList } from '../../types';
 import { THEME } from '@/lib/theme';
 
 export default function Home() {
-	// const { user, signOut } = useAuth();
-
-	type navigationProp = StackNavigationProp<RootStackParamList>;
-	const navigation = useNavigation<navigationProp>();
-	const dispatch = useAppDispatch();
-
-	async function doLogOut() {
-		await SecureStore.deleteItemAsync('token');
-		dispatch(logout());
-	}
+	const navigation = useNavigation<DrawerNavigationProp<DrawerParamList>>();
+	const user = useAppSelector((state) => state.auth.user);
+	const leagues = useAppSelector((state) => state.leagues.leagues);
 
 	return (
 		<View style={{ backgroundColor: THEME.light.background, flex: 1, padding: 20, gap: 12 }}>
-			<Text>Home Page</Text>
+			<Text className="text-2xl font-bold">
+				Welcome{user ? `, ${user.firstName}` : ''}
+			</Text>
+			<Text className="text-muted-foreground">
+				{leagues?.length
+					? `You're in ${leagues.length} league${leagues.length === 1 ? '' : 's'}.`
+					: "You haven't joined a league yet."}
+			</Text>
+			<Button onPress={() => navigation.navigate('LeaguesScreen')} className="mt-4">
+				<Text>View Leagues</Text>
+			</Button>
 		</View>
 	);
 }

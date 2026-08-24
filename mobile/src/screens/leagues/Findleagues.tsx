@@ -1,28 +1,18 @@
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import React from 'react';
 import { theme } from '../../ui/theme';
-import { Input } from '../../ui/Input';
+import { EmptyState } from '../../ui/EmptyState';
 
 export default function Findleagues() {
 	return (
-		<View style={{ flex: 1, flexDirection: 'column', gap: 20, backgroundColor: theme.colors.bg }}>
-			{/* Filters */}
-			<View
-				style={{
-					marginTop: 20,
-					flexDirection: 'row',
-					justifyContent: 'space-evenly',
-				}}
-			>
-				<Text style={{ color: theme.colors.text }}>Test1</Text>
-				<Text style={{ color: theme.colors.text }}>Test2</Text>
-				<Text style={{ color: theme.colors.text }}>Test3</Text>
-				<Text style={{ color: theme.colors.text }}>Test4</Text>
-				<Text style={{ color: theme.colors.text }}>Test5</Text>
-			</View>
-
-			{/* Search Bar */}
-			<Input />
+		<View
+			style={{
+				flex: 1,
+				padding: theme.spacing.lg,
+				backgroundColor: theme.colors.bg,
+			}}
+		>
+			<EmptyState message="Joining a league by invite code is coming soon. Ask your league owner for an invite." />
 		</View>
 	);
 }

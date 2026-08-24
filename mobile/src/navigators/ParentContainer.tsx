@@ -1,7 +1,5 @@
-import { Text } from 'react-native';
 import { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
 import { RootState } from '../redux/store';
 import { bootstrapAuth } from '../redux/slices/AuthSlice';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
@@ -16,7 +14,7 @@ const ParentContainer = () => {
 
 	useEffect(() => {
 		dispatch(bootstrapAuth());
-	}, []);
+	}, [dispatch]);
 
 	if (!ready) {
 		return <LoadingScreen />;

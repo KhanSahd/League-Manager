@@ -1,10 +1,10 @@
-import { View, Text, FlatList, Pressable, TextInput } from 'react-native';
+import { View, FlatList, Pressable } from 'react-native';
 import { useEffect, useState } from 'react';
-// import { createTeam, deleteTeam, getTeams } from "../api/teams";
 import { Card } from '../ui/Card';
-import { emptyTextStyle, theme } from '../ui/theme';
+import { theme } from '../ui/theme';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
+import { Text } from '../ui/text';
 import { EmptyState } from '../ui/EmptyState';
 import Entypo from '@expo/vector-icons/Entypo';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
@@ -13,23 +13,27 @@ import {
 	fetchTeamsForLeague,
 	removeTeamFromLeague,
 } from '../redux/slices/TeamsSlice';
-import { Team } from '../../types';
+import { LeaguesStackParamList } from '../../types';
 import { RootState } from '../redux/store';
-import { useRoute } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 
 export default function Teams() {
-	// const { leagueId, leagueName, role } = useLocalSearchParams();
-	// const router = useRouter();
+	type navigationProp = StackNavigationProp<LeaguesStackParamList>;
+	type routeProp = RouteProp<LeaguesStackParamList, 'Teams'>;
+
 	const dispatch = useAppDispatch();
-	const route = useRoute();
-	const { leagueId } = route.params as { leagueId: string };
+	const navigation = useNavigation<navigationProp>();
+	const route = useRoute<routeProp>();
+	const { leagueId } = route.params;
 
 	const teams = useAppSelector((state: RootState) => state.teams.teams);
 	const league = useAppSelector((state) => state.leagues.leagues?.find((l) => l.id === leagueId));
 	const [name, setName] = useState('');
 	const [creating, setCreating] = useState(false);
-	// const canDelete = role != "MEMBER";
-	const canDelete = true;
+	const role = league?.role;
+	const canDelete = role !== 'MEMBER';
+	const loading = useAppSelector((state: RootState) => state.teams.loading);
 
 	async function load() {
 		await dispatch(fetchTeamsForLeague({ leagueId: leagueId }));
@@ -77,7 +81,7 @@ export default function Teams() {
 				{league?.name || 'unknown'}
 			</Text>
 
-			{useAppSelector((state) => state.teams.loading) == true ? null : teams?.length === 0 ? (
+			{loading ? null : teams?.length === 0 ? (
 				<EmptyState message="No teams in this league. Create a team below." />
 			) : (
 				<FlatList
@@ -86,13 +90,8 @@ export default function Teams() {
 					contentContainerStyle={{ gap: theme.spacing.sm }}
 					renderItem={({ item }) => (
 						<Pressable
-							onPress={
-								() =>
-									// router.push({
-									//   pathname: "/roster",
-									//   params: { teamId: item.id, teamName: item.name, role: role },
-									// })
-									null // fix me
+							onPress={() =>
+								navigation.navigate('Roster', { teamId: item.id, teamName: item.name })
 							}
 						>
 							<Card>
@@ -122,7 +121,7 @@ export default function Teams() {
 				/>
 			)}
 
-			{useAppSelector((state) => state.teams.loading) == false && (
+			{!loading && (
 				<View style={{ flex: 1, justifyContent: 'flex-end' }}>
 					<Text
 						style={{
@@ -138,7 +137,9 @@ export default function Teams() {
 
 					<View style={{ height: theme.spacing.md }} />
 
-					<Button label={creating ? 'Creating...' : 'Create Team'} onPress={submit} />
+					<Button onPress={submit} disabled={creating}>
+						<Text>{creating ? 'Creating...' : 'Create Team'}</Text>
+					</Button>
 				</View>
 			)}
 		</View>

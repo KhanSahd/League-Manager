@@ -1,4 +1,4 @@
-import { View, Text, Platform } from 'react-native';
+import { Platform } from 'react-native';
 import React from 'react';
 import { TriggerRef } from '@rn-primitives/select';
 import {
@@ -10,9 +10,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from './select';
-import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { useAppSelector } from '@/redux/hooks';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { setSelectedSport } from '@/redux/slices/SportsSlice';
 import { Sport } from 'types';
 
 interface ChildProps {

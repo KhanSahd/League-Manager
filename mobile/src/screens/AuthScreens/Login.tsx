@@ -6,22 +6,20 @@ import { Input } from '../../ui/Input';
 import { Button } from '../../ui/Button';
 import * as SecureStore from 'expo-secure-store';
 import { loginSuccess, setToken } from '../../redux/slices/AuthSlice';
-import { AuthResponse, RootStackParamList, User } from '../../../types';
+import { AuthResponse, AuthStackParamList, User } from '../../../types';
 import { useNavigation } from '@react-navigation/native';
 import { useAppDispatch } from '../../redux/hooks';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { THEME } from '@/lib/theme';
 import { Card, CardContent, CardFooter, CardHeader } from '@/ui/Card';
 import { Label } from '@/ui/label';
 import { Text } from '@/ui/text';
 
 export default function Login() {
-	type navigationProp = StackNavigationProp<RootStackParamList>;
+	type navigationProp = StackNavigationProp<AuthStackParamList>;
 
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [error, setError] = useState<string | null>(null);
-	const [user, setUser] = useState<User | null>(null);
 	const dispatch = useAppDispatch();
 	const navigation = useNavigation<navigationProp>();
 
@@ -101,7 +99,7 @@ export default function Login() {
 						variant={'secondary'}
 						className="w-full"
 					>
-						<Text>Don't have an account? Register</Text>
+						<Text>Don&apos;t have an account? Register</Text>
 					</Button>
 					<Button
 						onPress={() => navigation.navigate('Forgot-Password')}

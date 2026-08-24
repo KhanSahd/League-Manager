@@ -1,199 +1,185 @@
-import { View, Text, FlatList, Alert, TouchableOpacity } from "react-native";
-import { useEffect, useState } from "react";
-import { addPlayer, getPlayers, Player, removePlayer } from "../api/teams";
-import { Button } from "../ui/Button";
-import { Input } from "../ui/Input";
-import { Card } from "../ui/Card";
-import { emptyTextStyle, theme } from "../ui/theme";
-import { EmptyState } from "../ui/EmptyState";
-import Entypo from "@expo/vector-icons/Entypo";
-import { League } from "../api/league";
-import { confirm } from "../ui/Helper";
+import { View, FlatList, TouchableOpacity } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
+import { Card } from '../ui/Card';
+import { Text } from '../ui/text';
+import { theme } from '../ui/theme';
+import { EmptyState } from '../ui/EmptyState';
+import Entypo from '@expo/vector-icons/Entypo';
+import { confirm } from '../ui/Helper';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
+import {
+	addPlayerToTeam,
+	fetchPlayersForTeam,
+	removePlayerFromTeam,
+} from '../redux/slices/PlayersSlice';
+import { RootState } from '../redux/store';
+import { LeaguesStackParamList } from '../../types';
+import { RouteProp, useRoute } from '@react-navigation/native';
 
 export default function Roster() {
-  // const { teamId, teamName, role } = useLocalSearchParams();
-  // const canDelete = role != "MEMBER";
-  const canDelete = true;
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [name, setName] = useState("");
-  const [fetching, setFetching] = useState(true);
-  const [creating, setCreating] = useState(false);
-  const [inEditMode, setInEditMode] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+	type routeProp = RouteProp<LeaguesStackParamList, 'Roster'>;
+	const route = useRoute<routeProp>();
+	const { teamId } = route.params;
 
+	const dispatch = useAppDispatch();
+	const players = useAppSelector((state: RootState) => state.players.players);
+	const loading = useAppSelector((state: RootState) => state.players.loading);
+	const canDelete = true;
 
-  async function load() {
-    setFetching(true);
-    // setPlayers(await getPlayers(teamId as string));
-    setFetching(false);
-  }
+	const [name, setName] = useState('');
+	const [creating, setCreating] = useState(false);
+	const [inEditMode, setInEditMode] = useState(false);
+	const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  async function submit() {
-    if (!name) return;
-    setCreating(true);
-    // await addPlayer(teamId as string, name);
-    setName("");
-    await load();
-    setCreating(false);
-  }
+	async function load() {
+		await dispatch(fetchPlayersForTeam({ teamId }));
+	}
 
-  async function deletePlayer(playerId: string) {
-    if (!playerId) return;
-    try {
-      // await removePlayer(teamId as string, playerId as string);
-    }
-    catch (error) {
-      Alert.alert("Failed to remove player: " + error);
-    }
-  }
+	async function submit() {
+		if (!name) return;
+		setCreating(true);
+		await dispatch(addPlayerToTeam({ teamId, name }));
+		setName('');
+		setCreating(false);
+	}
 
-  /**
-   * Add a player ID to the selected IDs list.
-   * @param playerId the ID of the player to add.
-   */
-  function addToSelectedIds(playerId: string) {
-    setSelectedIds(ids => [...ids, playerId]);
-  }
+	function addToSelectedIds(playerId: string) {
+		setSelectedIds((ids) => [...ids, playerId]);
+	}
 
-  /**
-   * Remove a player ID from the selected IDs list.
-   * @param playerId the ID of the player to remove.
-   */
-  function removeFromSelectedIds(playerId: string) {
-    setSelectedIds(ids => ids.filter(id => id !== playerId));
-  }
+	function removeFromSelectedIds(playerId: string) {
+		setSelectedIds((ids) => ids.filter((id) => id !== playerId));
+	}
 
-  useEffect(() => {
-    load();
-  }, []);
+	useEffect(() => {
+		load();
+	}, []);
 
-  return (
-    <View
-      style={{
-        flex: 1,
-        paddingHorizontal: theme.spacing.lg,
-        paddingBottom: theme.spacing.lg,
-        gap: theme.spacing.md,
-      }}
-    >
-      {/* Screen title */}
-      <View style={{
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}>
-        <Text
-          style={{
-            fontSize: theme.textSize.xl,
-            color: theme.colors.text,
-            fontWeight: "600",
-          }}
-        >
-          {/* {teamName} */}
-        </Text>
-        { canDelete && <Entypo name="edit" size={24} color={theme.colors.text}
-          onPress={() => setInEditMode(!inEditMode)}
-        /> }
-      </View>
-      {fetching ? null : players.length === 0 ? (
-        <EmptyState message="No players added yet." />
-      ) : (
-        <FlatList
-          data={players}
-          keyExtractor={(p) => p.id}
-          contentContainerStyle={{ gap: theme.spacing.sm }}
-          renderItem={({ item }) => (
-            <Card>
-              <View style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                // backgroundColor: theme.colors.muted,
-                // padding: theme.spacing.md,
-                // borderRadius: theme.radius.sm,
-              }}>
-                {inEditMode && canDelete && (
-                  <TouchableOpacity style={{
-                    borderRadius: "100%",
-                    backgroundColor: selectedIds.includes(item.id) ? "green" : "transparent",
-                    borderWidth: 1,
-                    borderColor: theme.colors.border,
-                    padding: 10,
-                  }}
-                  onPress={() => {
-                    if (selectedIds.includes(item.id)) {
-                      removeFromSelectedIds(item.id);
-                    } else {
-                      addToSelectedIds(item.id);
-                    }
-                  }}
-                  >
-                  </TouchableOpacity>  
-                )}
-                <Text
-                  style={{
-                    fontSize: theme.textSize.md,
-                    color: theme.colors.text,
-                    fontWeight: "500",
-                    flex: 1,
-                    textAlign: "center"
-                  }}
-                >
-                  {item.name}
-                </Text>
-              </View>
-            </Card>
-          )}
-        />
-          
-      )}
+	return (
+		<View
+			style={{
+				flex: 1,
+				paddingHorizontal: theme.spacing.lg,
+				paddingBottom: theme.spacing.lg,
+				paddingTop: theme.spacing.lg,
+				gap: theme.spacing.md,
+			}}
+		>
+			<View
+				style={{
+					flexDirection: 'row',
+					justifyContent: 'flex-end',
+					alignItems: 'center',
+				}}
+			>
+				{canDelete && (
+					<Entypo
+						name="edit"
+						size={24}
+						color={theme.colors.text}
+						onPress={() => setInEditMode(!inEditMode)}
+					/>
+				)}
+			</View>
 
-      {/* Add player (secondary action) */}
-      {!fetching && !inEditMode ? (
-        <Card>
-          <Text
-            style={{
-              fontSize: theme.textSize.md,
-              color: theme.colors.text,
-              fontWeight: "500",
-              marginBottom: theme.spacing.sm,
-            }}
-          >
-            Add Player
-          </Text>
+			{loading ? null : players?.length === 0 || !players ? (
+				<EmptyState message="No players added yet." />
+			) : (
+				<FlatList
+					data={players}
+					keyExtractor={(p) => p.id}
+					contentContainerStyle={{ gap: theme.spacing.sm }}
+					renderItem={({ item }) => (
+						<Card>
+							<View
+								style={{
+									flexDirection: 'row',
+									alignItems: 'center',
+									gap: theme.spacing.sm,
+								}}
+							>
+								{inEditMode && canDelete && (
+									<TouchableOpacity
+										style={{
+											borderRadius: 100,
+											backgroundColor: selectedIds.includes(item.id)
+												? theme.colors.primary
+												: 'transparent',
+											borderWidth: 1,
+											borderColor: theme.colors.border,
+											width: 22,
+											height: 22,
+										}}
+										onPress={() => {
+											if (selectedIds.includes(item.id)) {
+												removeFromSelectedIds(item.id);
+											} else {
+												addToSelectedIds(item.id);
+											}
+										}}
+									/>
+								)}
+								<Text
+									style={{
+										fontSize: theme.textSize.md,
+										color: theme.colors.text,
+										fontWeight: '500',
+										flex: 1,
+									}}
+								>
+									{item.name}
+								</Text>
+							</View>
+						</Card>
+					)}
+				/>
+			)}
 
-          <Input
-            placeholder="Player name"
-            value={name}
-            onChangeText={setName}
-          />
+			{!inEditMode ? (
+				<Card>
+					<Text
+						style={{
+							fontSize: theme.textSize.md,
+							color: theme.colors.text,
+							fontWeight: '500',
+							marginBottom: theme.spacing.sm,
+						}}
+					>
+						Add Player
+					</Text>
 
-          <View style={{ height: theme.spacing.md }} />
+					<Input placeholder="Player name" value={name} onChangeText={setName} />
 
-          <Button label="Add Player" onPress={submit} />
-        </Card>
-      ) : (
-        inEditMode && canDelete && (
-          <Button
-            label={`Remove Selected Players (${selectedIds.length})`}
-            variant="danger"
-            onPress={async () => {
-              const shouldDelete = await confirm(
-                `Are you sure you want to remove ${selectedIds.length} player(s)?`
-              );
-              if (!shouldDelete) return;
+					<View style={{ height: theme.spacing.md }} />
 
-              for (const playerId of selectedIds) {
-                await deletePlayer(playerId);
-              }
+					<Button onPress={submit} disabled={creating}>
+						<Text>{creating ? 'Adding...' : 'Add Player'}</Text>
+					</Button>
+				</Card>
+			) : (
+				canDelete && (
+					<Button
+						variant="destructive"
+						onPress={async () => {
+							const shouldDelete = await confirm(
+								`Are you sure you want to remove ${selectedIds.length} player(s)?`
+							);
+							if (!shouldDelete) return;
 
-              setSelectedIds([]);
-              setInEditMode(false);
-              await load();
-            }}
-          />
-        )
-      )}
-    </View>
-  );
+							for (const playerId of selectedIds) {
+								await dispatch(removePlayerFromTeam({ teamId, playerId }));
+							}
+
+							setSelectedIds([]);
+							setInEditMode(false);
+						}}
+					>
+						<Text>Remove Selected Players ({selectedIds.length})</Text>
+					</Button>
+				)
+			)}
+		</View>
+	);
 }

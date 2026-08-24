@@ -5,7 +5,8 @@ import { theme } from '../../ui/theme';
 import { Input } from '../../ui/Input';
 import { Button } from '../../ui/Button';
 import { useNavigation } from '@react-navigation/native';
-import { AuthResponse } from '../../../types';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { AuthResponse, AuthStackParamList } from '../../../types';
 import * as SecureStore from 'expo-secure-store';
 import { loginSuccess, setToken } from '../../redux/slices/AuthSlice';
 import { useAppDispatch } from '../../redux/hooks';
@@ -16,13 +17,15 @@ import { Label } from '@/ui/label';
 type User = { id: string; firstName: string; lastName: string; email: string };
 
 const Register = () => {
+	type navigationProp = StackNavigationProp<AuthStackParamList>;
+
 	const [firstName, setFirstName] = useState('');
 	const [lastName, setLastName] = useState('');
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [confirmedPassword, setConfirmedPassword] = useState('');
 	const [error, setError] = useState<string | null>(null);
-	const navigation = useNavigation();
+	const navigation = useNavigation<navigationProp>();
 	const dispatch = useAppDispatch();
 
 	async function submit() {

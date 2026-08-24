@@ -4,10 +4,12 @@ import { THEME } from '@/lib/theme';
 import { Text } from '@/ui/text';
 import { Button } from '@/ui/Button';
 import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { MotiView } from 'moti';
+import { AuthStackParamList } from '../../../types';
 
 const WelcomeScreen = () => {
-	const navigate = useNavigation<any>();
+	const navigate = useNavigation<StackNavigationProp<AuthStackParamList>>();
 	return (
 		<View
 			className="flex-1 items-center justify-content pt-16"

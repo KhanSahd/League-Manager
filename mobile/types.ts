@@ -1,13 +1,25 @@
-// Root Stack Parameter List
-export type RootStackParamList = {
+import { NavigatorScreenParams } from '@react-navigation/native';
+
+// Navigator parameter lists, one per navigator, composed the same way the
+// navigators themselves are nested (Drawer > Leagues stack).
+export type AuthStackParamList = {
+	Welcome: undefined;
 	Login: undefined;
 	Register: undefined;
 	'Forgot-Password': undefined;
-	HomeScreen: undefined;
-	Teams: { leagueId: string };
-	Roster: { teamId: string };
+};
+
+export type LeaguesStackParamList = {
+	Leagues: undefined;
 	'Join Leagues': undefined;
 	MyLeagues: undefined;
+	Teams: { leagueId: string };
+	Roster: { teamId: string; teamName?: string };
+};
+
+export type DrawerParamList = {
+	HomeScreen: undefined;
+	LeaguesScreen: NavigatorScreenParams<LeaguesStackParamList> | undefined;
 };
 
 // Redux initial States
@@ -30,6 +42,12 @@ export type LeagueState = {
 export type TeamState = {
 	teams: Team[] | null;
 	selectedTeam: Team | null;
+	loading: boolean;
+	error: string | null;
+};
+
+export type PlayerState = {
+	players: Player[] | null;
 	loading: boolean;
 	error: string | null;
 };

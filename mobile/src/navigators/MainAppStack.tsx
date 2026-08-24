@@ -1,4 +1,3 @@
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from '../screens/Home';
 import Entypo from '@expo/vector-icons/Entypo';
 import { theme } from '../ui/theme';
@@ -9,10 +8,10 @@ import { getSports } from '@/redux/slices/SportsSlice';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import Leagues from './Leagues';
 import CustomDrawerContent from './CustomDrawer/CustomDrawerContent';
+import { DrawerParamList } from '../../types';
 
 const MainAppStack = () => {
-	const Tabs = createBottomTabNavigator();
-	const Drawer = createDrawerNavigator();
+	const Drawer = createDrawerNavigator<DrawerParamList>();
 	const dispatch = useAppDispatch();
 
 	useEffect(() => {
@@ -21,26 +20,6 @@ const MainAppStack = () => {
 	}, [dispatch]);
 
 	return (
-		// <Tabs.Navigator
-		// 	screenOptions={{
-		// 		tabBarActiveTintColor: THEME.light.primary,
-		// 		tabBarInactiveTintColor: THEME.light.secondary,
-		// 		tabBarStyle: {
-		// 			backgroundColor: THEME.light.background,
-		// 			borderTopWidth: 1,
-		// 			borderTopColor: THEME.light.border,
-		// 		},
-		// 		headerShown: false,
-		// 	}}
-		// >
-		// 	<Tabs.Screen
-		// 		name="Home"
-		// 		component={HomeNavigator}
-		// 		options={{
-		// 			tabBarIcon: ({ color }) => <Entypo name="home" size={24} color={color} />,
-		// 		}}
-		// 	/>
-		// </Tabs.Navigator>
 		<Drawer.Navigator
 			backBehavior="history"
 			screenOptions={{
@@ -59,7 +38,6 @@ const MainAppStack = () => {
 					drawerLabel: 'Home',
 					drawerIcon: ({ color }) => <Entypo name="home" size={24} color={color} />,
 				}}
-				// options={{ header: () => <Header title="Home" /> }}
 			/>
 			<Drawer.Screen
 				name="LeaguesScreen"
@@ -70,18 +48,7 @@ const MainAppStack = () => {
 					drawerIcon: ({ color }) => <Entypo name="plus" size={24} color={color} />,
 					headerShown: false,
 				}}
-				// options={{ header: () => <Header title="Join a League" /> }}
 			/>
-			{/* <Drawer.Screen
-				name="MyLeagues"
-				component={MyLeagues}
-				// options={{ header: () => <Header title="My Leagues" /> }}
-			/>
-			<Drawer.Screen
-				name="Teams"
-				component={Teams}
-				// options={{ header: () => <Header title="Teams" /> }}
-			/> */}
 		</Drawer.Navigator>
 	);
 };
