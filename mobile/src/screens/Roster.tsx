@@ -28,7 +28,10 @@ export default function Roster() {
 	const loading = useAppSelector((state: RootState) => state.players.loading);
 	const canDelete = true;
 
-	const [name, setName] = useState('');
+	const [firstName, setFirstName] = useState('');
+	const [lastName, setLastName] = useState('');
+	const [jerseyNumber, setJerseyNumber] = useState('');
+	const [position, setPosition] = useState('');
 	const [creating, setCreating] = useState(false);
 	const [inEditMode, setInEditMode] = useState(false);
 	const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -38,10 +41,21 @@ export default function Roster() {
 	}
 
 	async function submit() {
-		if (!name) return;
+		if (!firstName || !lastName) return;
 		setCreating(true);
-		await dispatch(addPlayerToTeam({ teamId, name }));
-		setName('');
+		await dispatch(
+			addPlayerToTeam({
+				teamId,
+				firstName,
+				lastName,
+				jerseyNumber: jerseyNumber ? Number(jerseyNumber) : undefined,
+				position: position || undefined,
+			})
+		);
+		setFirstName('');
+		setLastName('');
+		setJerseyNumber('');
+		setPosition('');
 		setCreating(false);
 	}
 
@@ -85,11 +99,11 @@ export default function Roster() {
 			</View>
 
 			{loading ? null : players?.length === 0 || !players ? (
-				<EmptyState message="No players added yet." />
+				<EmptyState message="No players on the roster for this season yet." />
 			) : (
 				<FlatList
 					data={players}
-					keyExtractor={(p) => p.id}
+					keyExtractor={(p) => p.playerId}
 					contentContainerStyle={{ gap: theme.spacing.sm }}
 					renderItem={({ item }) => (
 						<Card>
@@ -104,7 +118,7 @@ export default function Roster() {
 									<TouchableOpacity
 										style={{
 											borderRadius: 100,
-											backgroundColor: selectedIds.includes(item.id)
+											backgroundColor: selectedIds.includes(item.playerId)
 												? theme.colors.primary
 												: 'transparent',
 											borderWidth: 1,
@@ -113,13 +127,25 @@ export default function Roster() {
 											height: 22,
 										}}
 										onPress={() => {
-											if (selectedIds.includes(item.id)) {
-												removeFromSelectedIds(item.id);
+											if (selectedIds.includes(item.playerId)) {
+												removeFromSelectedIds(item.playerId);
 											} else {
-												addToSelectedIds(item.id);
+												addToSelectedIds(item.playerId);
 											}
 										}}
 									/>
+								)}
+								{item.jerseyNumber != null && (
+									<Text
+										style={{
+											fontSize: theme.textSize.md,
+											color: theme.colors.muted,
+											fontWeight: '600',
+											width: 32,
+										}}
+									>
+										#{item.jerseyNumber}
+									</Text>
 								)}
 								<Text
 									style={{
@@ -129,8 +155,13 @@ export default function Roster() {
 										flex: 1,
 									}}
 								>
-									{item.name}
+									{item.firstName} {item.lastName}
 								</Text>
+								{item.position && (
+									<Text style={{ fontSize: theme.textSize.sm, color: theme.colors.muted }}>
+										{item.position}
+									</Text>
+								)}
 							</View>
 						</Card>
 					)}
@@ -150,11 +181,34 @@ export default function Roster() {
 						Add Player
 					</Text>
 
-					<Input placeholder="Player name" value={name} onChangeText={setName} />
+					<View style={{ flexDirection: 'row', gap: theme.spacing.sm }}>
+						<View style={{ flex: 1 }}>
+							<Input placeholder="First name" value={firstName} onChangeText={setFirstName} />
+						</View>
+						<View style={{ flex: 1 }}>
+							<Input placeholder="Last name" value={lastName} onChangeText={setLastName} />
+						</View>
+					</View>
+
+					<View style={{ height: theme.spacing.sm }} />
+
+					<View style={{ flexDirection: 'row', gap: theme.spacing.sm }}>
+						<View style={{ width: 90 }}>
+							<Input
+								placeholder="#"
+								value={jerseyNumber}
+								onChangeText={setJerseyNumber}
+								keyboardType="number-pad"
+							/>
+						</View>
+						<View style={{ flex: 1 }}>
+							<Input placeholder="Position (optional)" value={position} onChangeText={setPosition} />
+						</View>
+					</View>
 
 					<View style={{ height: theme.spacing.md }} />
 
-					<Button onPress={submit} disabled={creating}>
+					<Button onPress={submit} disabled={creating || !firstName || !lastName}>
 						<Text>{creating ? 'Adding...' : 'Add Player'}</Text>
 					</Button>
 				</Card>

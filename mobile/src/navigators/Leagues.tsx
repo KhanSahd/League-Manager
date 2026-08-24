@@ -1,6 +1,6 @@
 import { Pressable } from 'react-native';
 import React from 'react';
-import Findleagues from '@/screens/leagues/Findleagues';
+import JoinLeague from '@/screens/leagues/JoinLeague';
 import MyLeagues from '@/screens/leagues/Myleagues';
 import Teams from '@/screens/Teams';
 import Roster from '@/screens/Roster';
@@ -31,7 +31,7 @@ const Leagues = () => {
 			/>
 			<stack.Screen
 				name="Join Leagues"
-				component={Findleagues}
+				component={JoinLeague}
 				options={{
 					title: 'Join Leagues',
 				}}

@@ -1,4 +1,4 @@
-import { View, FlatList, Pressable } from 'react-native';
+import { View, FlatList, Pressable, Modal } from 'react-native';
 import { useEffect, useState } from 'react';
 import { Card } from '../ui/Card';
 import { theme } from '../ui/theme';
@@ -13,6 +13,11 @@ import {
 	fetchTeamsForLeague,
 	removeTeamFromLeague,
 } from '../redux/slices/TeamsSlice';
+import {
+	activateSeasonById,
+	createSeasonForLeague,
+	fetchSeasonsForLeague,
+} from '../redux/slices/SeasonsSlice';
 import { LeaguesStackParamList } from '../../types';
 import { RootState } from '../redux/store';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
@@ -29,20 +34,26 @@ export default function Teams() {
 
 	const teams = useAppSelector((state: RootState) => state.teams.teams);
 	const league = useAppSelector((state) => state.leagues.leagues?.find((l) => l.id === leagueId));
+	const seasons = useAppSelector((state: RootState) => state.seasons.seasons);
+	const activeSeason = useAppSelector((state: RootState) => state.seasons.activeSeason);
 	const [name, setName] = useState('');
 	const [creating, setCreating] = useState(false);
+	const [showSeasonModal, setShowSeasonModal] = useState(false);
+	const [newSeasonName, setNewSeasonName] = useState('');
+	const [creatingSeason, setCreatingSeason] = useState(false);
 	const role = league?.role;
 	const canDelete = role !== 'MEMBER';
+	const canManageSeasons = role === 'OWNER' || role === 'ADMIN';
 	const loading = useAppSelector((state: RootState) => state.teams.loading);
 
 	async function load() {
 		await dispatch(fetchTeamsForLeague({ leagueId: leagueId }));
+		await dispatch(fetchSeasonsForLeague({ leagueId: leagueId }));
 	}
 
 	async function submit() {
 		if (!name) return;
 		setCreating(true);
-		// await createTeam(leagueId as string, name);
 		await dispatch(createTeamForLeague({ leagueId: leagueId, name: name }));
 		setName('');
 		await load();
@@ -51,8 +62,23 @@ export default function Teams() {
 
 	async function removeTeam(teamId: string) {
 		if (!teamId) return;
-		// await deleteTeam(teamId as string);
 		await dispatch(removeTeamFromLeague({ leagueId: leagueId, teamId: teamId }));
+		await load();
+	}
+
+	async function switchToSeason(seasonId: string) {
+		await dispatch(activateSeasonById({ seasonId }));
+		setShowSeasonModal(false);
+		await load();
+	}
+
+	async function submitNewSeason() {
+		if (!newSeasonName) return;
+		setCreatingSeason(true);
+		await dispatch(createSeasonForLeague({ leagueId, name: newSeasonName, activate: true }));
+		setNewSeasonName('');
+		setCreatingSeason(false);
+		setShowSeasonModal(false);
 		await load();
 	}
 
@@ -77,9 +103,19 @@ export default function Teams() {
 					fontWeight: '600',
 				}}
 			>
-				{/* {leagueName} */}
 				{league?.name || 'unknown'}
 			</Text>
+
+			<Pressable
+				disabled={!canManageSeasons}
+				onPress={() => setShowSeasonModal(true)}
+				style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.xs }}
+			>
+				<Text style={{ color: theme.colors.primary, fontWeight: '500' }}>
+					{activeSeason?.name ?? 'Loading season...'}
+				</Text>
+				{canManageSeasons && <Entypo name="chevron-down" size={16} color={theme.colors.primary} />}
+			</Pressable>
 
 			{loading ? null : teams?.length === 0 ? (
 				<EmptyState message="No teams in this league. Create a team below." />
@@ -142,6 +178,55 @@ export default function Teams() {
 					</Button>
 				</View>
 			)}
+
+			<Modal visible={showSeasonModal} animationType="slide" transparent onRequestClose={() => setShowSeasonModal(false)}>
+				<View
+					style={{
+						flex: 1,
+						justifyContent: 'flex-end',
+						backgroundColor: 'rgba(0,0,0,0.4)',
+					}}
+				>
+					<View
+						style={{
+							backgroundColor: theme.colors.bg,
+							padding: theme.spacing.lg,
+							borderTopLeftRadius: theme.radius.md,
+							borderTopRightRadius: theme.radius.md,
+							gap: theme.spacing.sm,
+						}}
+					>
+						<Text style={{ fontSize: theme.textSize.lg, fontWeight: '600', color: theme.colors.text }}>
+							Seasons
+						</Text>
+
+						{seasons?.map((season) => (
+							<Pressable key={season.id} onPress={() => switchToSeason(season.id)}>
+								<Card>
+									<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+										<Text style={{ color: theme.colors.text }}>{season.name}</Text>
+										{season.active && <Text style={{ color: theme.colors.primary }}>Active</Text>}
+									</View>
+								</Card>
+							</Pressable>
+						))}
+
+						<View style={{ height: theme.spacing.sm }} />
+						<Input
+							placeholder="New season name"
+							value={newSeasonName}
+							onChangeText={setNewSeasonName}
+						/>
+						<View style={{ height: theme.spacing.sm }} />
+						<Button onPress={submitNewSeason} disabled={creatingSeason || !newSeasonName}>
+							<Text>{creatingSeason ? 'Starting...' : 'Start New Season'}</Text>
+						</Button>
+						<Button variant="ghost" onPress={() => setShowSeasonModal(false)}>
+							<Text>Close</Text>
+						</Button>
+					</View>
+				</View>
+			</Modal>
 		</View>
 	);
 }

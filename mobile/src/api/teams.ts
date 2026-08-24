@@ -33,15 +33,25 @@ export async function getPlayers(teamId: string): Promise<Player[]> {
 }
 
 /**
- * Add a new player to a specific team.
+ * Add a new player to the league and place them on this team's roster for
+ * the league's active season, in one step.
  * @param teamId - The ID of the team.
- * @param name - The name of the player.
- * @returns A promise that resolves to the created player.
+ * @param firstName - The player's first name.
+ * @param lastName - The player's last name.
+ * @param jerseyNumber - Optional jersey number, unique per team per season.
+ * @param position - Optional position label.
+ * @returns A promise that resolves to the created roster entry.
  */
-export async function addPlayer(teamId: string, name: string): Promise<Player> {
+export async function addPlayer(
+	teamId: string,
+	firstName: string,
+	lastName: string,
+	jerseyNumber?: number,
+	position?: string,
+): Promise<Player> {
 	return api<Player>(`/teams/${teamId}/players`, {
 		method: 'POST',
-		body: JSON.stringify({ name }),
+		body: JSON.stringify({ firstName, lastName, jerseyNumber, position }),
 	});
 }
 

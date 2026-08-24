@@ -1,4 +1,4 @@
-import { View, Pressable, FlatList, Modal } from 'react-native';
+import { View, Pressable, FlatList, Modal, Share, Alert } from 'react-native';
 import { useState } from 'react';
 import {
 	Card,
@@ -25,6 +25,7 @@ import {
 } from '../../redux/slices/leaguesSlice';
 import { RootState } from '../../redux/store';
 import { League, LeaguesStackParamList, Sport } from '../../../types';
+import { createInvite } from '../../api/invites';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { THEME } from '@/lib/theme';
@@ -47,6 +48,22 @@ export default function MyLeagues() {
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 	const [confirmText, setConfirmText] = useState('');
+	const [inviting, setInviting] = useState(false);
+
+	async function inviteMembers() {
+		if (!selectedLeague) return;
+		setInviting(true);
+		try {
+			const invite = await createInvite(selectedLeague.id, 'MEMBER');
+			await Share.share({
+				message: `Join ${selectedLeague.name} on League Manager! Use invite code: ${invite.code}`,
+			});
+		} catch (e: any) {
+			Alert.alert('Failed to create invite', e.message);
+		} finally {
+			setInviting(false);
+		}
+	}
 
 	async function submit() {
 		if (!createName || !createSport) return;
@@ -342,6 +359,9 @@ export default function MyLeagues() {
 								}}
 							>
 								<Text>Update League</Text>
+							</Button>
+							<Button variant={'secondary'} onPress={inviteMembers} disabled={inviting}>
+								<Text>{inviting ? 'Creating invite...' : 'Invite Members'}</Text>
 							</Button>
 							<Button variant={'secondary'} onPress={() => clearValues()}>
 								<Text>Cancel</Text>

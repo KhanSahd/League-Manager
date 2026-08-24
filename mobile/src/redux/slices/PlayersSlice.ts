@@ -21,12 +21,12 @@ export const fetchPlayersForTeam = createAsyncThunk<
 
 export const addPlayerToTeam = createAsyncThunk<
 	Player,
-	{ teamId: string; name: string },
+	{ teamId: string; firstName: string; lastName: string; jerseyNumber?: number; position?: string },
 	{ state: RootState; rejectValue: string }
->('teams/addPlayerToTeam', async ({ teamId, name }, thunkAPI) => {
+>('teams/addPlayerToTeam', async ({ teamId, firstName, lastName, jerseyNumber, position }, thunkAPI) => {
 	try {
-		if (teamId && name) {
-			const data = await addPlayer(teamId, name);
+		if (teamId && firstName && lastName) {
+			const data = await addPlayer(teamId, firstName, lastName, jerseyNumber, position);
 			return data;
 		}
 		throw new Error('Invalid player data');
@@ -92,7 +92,7 @@ const playersSlice = createSlice({
 			.addCase(removePlayerFromTeam.fulfilled, (state, action) => {
 				state.loading = false;
 				if (state.players) {
-					state.players = state.players.filter((p) => p.id !== action.meta.arg.playerId);
+					state.players = state.players.filter((p) => p.playerId !== action.meta.arg.playerId);
 				}
 			})
 			.addCase(removePlayerFromTeam.rejected, (state, action) => {

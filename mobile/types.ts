@@ -52,6 +52,13 @@ export type PlayerState = {
 	error: string | null;
 };
 
+export type SeasonState = {
+	seasons: Season[] | null;
+	activeSeason: Season | null;
+	loading: boolean;
+	error: string | null;
+};
+
 export type SportsState = {
 	sports: Sport[] | null;
 	selectedSport: Sport | null;
@@ -71,11 +78,14 @@ export type User = {
 	email: string;
 };
 
+export type LeagueRole = 'OWNER' | 'ADMIN' | 'TEAM_MANAGER' | 'SCOREKEEPER' | 'MEMBER' | 'SPECTATOR';
+
 export type League = {
 	id: string;
 	name: string;
+	slug: string;
 	sport: Sport;
-	role: 'OWNER' | 'ADMIN' | 'MEMBER';
+	role: LeagueRole;
 };
 
 export type UpdateLeagueRequest = {
@@ -89,12 +99,40 @@ export type Team = {
 	name: string;
 };
 
+// A player as placed on a team's roster for the league's active season.
 export type Player = {
-	id: string;
-	name: string;
+	playerId: string;
+	firstName: string;
+	lastName: string;
+	jerseyNumber: number | null;
+	position: string | null;
 };
 
 export type Sport = {
 	id: string;
 	name: string;
+};
+
+export type Season = {
+	id: string;
+	name: string;
+	startsOn: string | null;
+	endsOn: string | null;
+	active: boolean;
+};
+
+export type LeagueInvite = {
+	id: string;
+	code: string;
+	role: LeagueRole;
+	expiresAt: string | null;
+	maxUses: number | null;
+	uses: number;
+	teamId: string | null;
+};
+
+export type RedeemInviteResult = {
+	leagueId: string;
+	leagueName: string;
+	role: LeagueRole;
 };
