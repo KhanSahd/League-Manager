@@ -111,8 +111,9 @@ class LeagueAuthorizationTest extends AbstractIntegrationTest {
                 authed(Map.of("name", "Sharks"), ownerToken), Map.class);
         UUID teamId = UUID.fromString((String) teamResponse.getBody().get("id"));
 
-        rest.exchange("/api/teams/" + teamId + "/players", HttpMethod.POST,
-                authed(Map.of("name", "Jane Doe"), ownerToken), Map.class);
+        ResponseEntity<Map> playerResponse = rest.exchange("/api/teams/" + teamId + "/players", HttpMethod.POST,
+                authed(Map.of("firstName", "Jane", "lastName", "Doe"), ownerToken), Map.class);
+        assertThat(playerResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         ResponseEntity<Map> deleteResponse = rest.exchange(
                 "/api/leagues/" + leagueId, HttpMethod.DELETE, authed(null, ownerToken), Map.class);
