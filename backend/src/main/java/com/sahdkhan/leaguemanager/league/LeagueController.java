@@ -40,12 +40,18 @@ public class LeagueController {
      */
     public record UpdateLeagueRequest( String name, UUID sportId ) {}
     public record SportResponse( UUID id, String name ) {}
-    public record LeagueResponse( UUID id, String name, SportResponse sport, LeagueRole role) {}
+    public record LeagueResponse(
+            UUID id,
+            String name,
+            String slug,
+            SportResponse sport,
+            LeagueRole role
+    ) {}
 
     private LeagueResponse toResponse(League league, LeagueRole role) {
         Sport sport = league.getSport();
         SportResponse sportResponse = sport == null ? null : new SportResponse(sport.getId(), sport.getName());
-        return new LeagueResponse(league.getId(), league.getName(), sportResponse, role);
+        return new LeagueResponse(league.getId(), league.getName(), league.getSlug(), sportResponse, role);
     }
 
     @PostMapping

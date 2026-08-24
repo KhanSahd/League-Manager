@@ -21,8 +21,29 @@ public class TeamController {
 
     record CreateTeamRequest(@NotBlank String name) {}
     record TeamResponse(UUID id, String name) {}
-    record CreatePlayerRequest(@NotBlank String name) {}
-    record PlayerResponse(UUID id, String name) {}
+    record CreatePlayerRequest(
+            @NotBlank String firstName,
+            @NotBlank String lastName,
+            Integer jerseyNumber,
+            String position
+    ) {}
+    record RosterEntryResponse(
+            UUID playerId,
+            String firstName,
+            String lastName,
+            Integer jerseyNumber,
+            String position
+    ) {}
+
+    private RosterEntryResponse toResponse(RosterEntry entry) {
+        return new RosterEntryResponse(
+                entry.getPlayer().getId(),
+                entry.getPlayer().getFirstName(),
+                entry.getPlayer().getLastName(),
+                entry.getJerseyNumber(),
+                entry.getPosition()
+        );
+    }
 
     @PostMapping("/league/{leagueId}")
     public TeamResponse createTeam(
@@ -45,29 +66,39 @@ public class TeamController {
                 .toList();
     }
 
+    /**
+     * Adds a new player to the league and places them on this team's roster
+     * for the league's active season.
+     */
     @PostMapping("/{teamId}/players")
-    public PlayerResponse addPlayer(
+    public RosterEntryResponse addPlayer(
             @PathVariable UUID teamId,
             @Valid @RequestBody CreatePlayerRequest req,
             @AuthenticationPrincipal AuthPrincipal principal
     ) {
-        Player p = teams.addPlayer(teamId, req.name(), principal.userId());
-        return new PlayerResponse(p.getId(), p.getName());
+        RosterEntry entry = teams.addPlayer(
+                teamId, req.firstName(), req.lastName(), req.jerseyNumber(), req.position(), principal.userId()
+        );
+        return toResponse(entry);
     }
 
+    /**
+     * The team's roster for the league's active season.
+     */
     @GetMapping("/{teamId}/players")
-    public List<PlayerResponse> players(
+    public List<RosterEntryResponse> players(
             @PathVariable UUID teamId,
             @AuthenticationPrincipal AuthPrincipal principal
     ) {
-        return teams.getPlayers(teamId, principal.userId())
+        return teams.getRoster(teamId, principal.userId())
                 .stream()
-                .map(p -> new PlayerResponse(p.getId(), p.getName()))
+                .map(this::toResponse)
                 .toList();
     }
 
     /**
-     * Remove a player from a team.
+     * Remove a player from a team's active-season roster. The player record
+     * itself is not deleted.
      * @param teamId - the ID of the team
      * @param playerId - the ID of the player to be removed
      */
@@ -78,7 +109,7 @@ public class TeamController {
             @AuthenticationPrincipal AuthPrincipal principal
     )
     {
-        teams.deletePlayer(teamId, playerId, principal.userId());
+        teams.removePlayer(teamId, playerId, principal.userId());
     }
 
     /**

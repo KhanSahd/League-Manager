@@ -1,5 +1,6 @@
 package com.sahdkhan.leaguemanager.exceptions;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -46,5 +47,12 @@ public class GlobalExceptionHandler
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException( IllegalArgumentException ex )
     {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body(HttpStatus.BAD_REQUEST, ex.getMessage()));
+    }
+
+    @ExceptionHandler( DataIntegrityViolationException.class )
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation( DataIntegrityViolationException ex )
+    {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(body(HttpStatus.CONFLICT, "That conflicts with an existing record"));
     }
 }

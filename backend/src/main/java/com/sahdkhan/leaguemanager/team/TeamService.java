@@ -1,144 +1,124 @@
 package com.sahdkhan.leaguemanager.team;
 
-import com.sahdkhan.leaguemanager.exceptions.ForbiddenException;
-import com.sahdkhan.leaguemanager.league.*;
+import com.sahdkhan.leaguemanager.league.League;
+import com.sahdkhan.leaguemanager.league.LeagueAccessService;
+import com.sahdkhan.leaguemanager.league.LeagueRepository;
+import com.sahdkhan.leaguemanager.season.Season;
+import com.sahdkhan.leaguemanager.season.SeasonRepository;
 import com.sahdkhan.leaguemanager.user.User;
 import com.sahdkhan.leaguemanager.user.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 /**
- * Service class for managing teams and players within leagues.
+ * Service class for managing teams and their rosters within leagues.
  */
 @Service
 public class TeamService {
 
-    /** Roles that may create, update, or delete resources within a league. */
-    private static final Set<LeagueRole> ADMIN_ROLES = Set.of(LeagueRole.OWNER, LeagueRole.ADMIN);
-
     private final TeamRepository teams;
     private final PlayerRepository players;
+    private final RosterEntryRepository rosterEntries;
     private final LeagueRepository leagues;
-    private final LeagueMemberRepository leagueMembers;
+    private final SeasonRepository seasons;
     private final UserRepository users;
+    private final LeagueAccessService access;
 
-    /**
-     * Constructs a TeamService with the given repositories.
-     *
-     * @param teams   the team repository
-     * @param players the player repository
-     * @param leagues the league repository
-     */
     public TeamService(
             TeamRepository teams,
             PlayerRepository players,
+            RosterEntryRepository rosterEntries,
             LeagueRepository leagues,
-            LeagueMemberRepository leagueMembers,
-            UserRepository users
+            SeasonRepository seasons,
+            UserRepository users,
+            LeagueAccessService access
     ) {
         this.teams = teams;
         this.players = players;
+        this.rosterEntries = rosterEntries;
         this.leagues = leagues;
-        this.leagueMembers = leagueMembers;
+        this.seasons = seasons;
         this.users = users;
-    }
-
-    private LeagueMember requireMembership(League league, User user) {
-        return leagueMembers.findByLeagueAndUser(league, user)
-                .orElseThrow(() -> new ForbiddenException("Not a member of this league"));
-    }
-
-    private void requireAdmin(League league, User user) {
-        LeagueMember m = requireMembership(league, user);
-        if (!ADMIN_ROLES.contains(m.getRole())) {
-            throw new ForbiddenException("Insufficient privileges");
-        }
+        this.access = access;
     }
 
     private User getUser( UUID userId ) {
         return users.findById( userId ).orElseThrow();
     }
 
+    private Season activeSeason( League league ) {
+        return seasons.findByLeagueAndActiveTrue( league ).orElseThrow();
+    }
 
     /**
      * Creates a new team within the specified league.
-     *
-     * @param leagueId the ID of the league
-     * @param name     the name of the team
-     * @return the created team
      */
     public Team createTeam( UUID leagueId, String name, UUID userId ) {
         League league = leagues.findById(leagueId).orElseThrow();
-        User user = users.findById( userId ).orElseThrow();
-        requireAdmin( league, user );
+        access.requireAdmin( league, getUser( userId ) );
         return teams.save(new Team(name, league));
     }
 
     /**
      * Retrieves all teams within the specified league.
-     *
-     * @param leagueId the ID of the league
-     * @return the list of teams in the league
      */
     public List<Team> getTeams(UUID leagueId, UUID userId) {
         League league = leagues.findById(leagueId).orElseThrow();
-        requireMembership( league, getUser( userId ) );
+        access.requireMembership( league, getUser( userId ) );
         return teams.findByLeague(league);
     }
 
     /**
-     * Adds a new player to the specified team.
-     *
-     * @param teamId the ID of the team
-     * @param name   the name of the player
-     * @return the added player
+     * Adds a new player to the league and places them on the team's roster
+     * for the league's active season, in one step.
      */
-    public Player addPlayer(UUID teamId, String name, UUID userId) {
+    @Transactional
+    public RosterEntry addPlayer(
+            UUID teamId, String firstName, String lastName,
+            Integer jerseyNumber, String position, UUID userId
+    ) {
         Team team = teams.findById(teamId).orElseThrow();
-        requireAdmin( team.getLeague(), getUser( userId ) );
-        return players.save(new Player(name, team));
+        access.requireTeamManageAccess( team.getLeague(), getUser( userId ), team );
+        Player player = players.save( new Player( team.getLeague(), firstName, lastName ) );
+        Season season = activeSeason( team.getLeague() );
+        return rosterEntries.save( new RosterEntry( season, team, player, jerseyNumber, position ) );
     }
 
     /**
-     * Retrieves all players within the specified team.
-     *
-     * @param teamId the ID of the team
-     * @return the list of players in the team
+     * Retrieves the team's roster for the league's active season.
      */
-    public List<Player> getPlayers(UUID teamId, UUID userId) {
+    public List<RosterEntry> getRoster(UUID teamId, UUID userId) {
         Team team = teams.findById(teamId).orElseThrow();
-        requireMembership( team.getLeague(), getUser( userId ) );
-        return players.findByTeam(team);
+        access.requireMembership( team.getLeague(), getUser( userId ) );
+        Season season = activeSeason( team.getLeague() );
+        return rosterEntries.findBySeasonAndTeam( season, team );
     }
 
     /**
-     * Deletes a player from the specified team.
-     * @param teamId the ID of the team
-     * @param playerId the ID of the player to be deleted
+     * Removes a player from the team's roster for the league's active season.
+     * The player themselves is not deleted, only this team/season placement.
      */
-    public void deletePlayer(UUID teamId, UUID playerId, UUID userId) {
+    public void removePlayer(UUID teamId, UUID playerId, UUID userId) {
         Team team = teams.findById( teamId ).orElseThrow();
-        Player player = players.findById(playerId).orElseThrow();
-        requireAdmin( team.getLeague(), getUser(userId) );
-        if (!player.getTeam().getId().equals( team.getId() ))
-        {
-            throw new IllegalArgumentException( "Player does not belong to the specified team" );
-        }
-        players.delete( player );
+        access.requireTeamManageAccess( team.getLeague(), getUser(userId), team );
+        Season season = activeSeason( team.getLeague() );
+        Player player = players.findById( playerId ).orElseThrow();
+        RosterEntry entry = rosterEntries.findBySeasonAndTeamAndPlayer( season, team, player ).orElseThrow();
+        rosterEntries.delete( entry );
     }
 
     /**
-     * Deletes a team using the ID of the team.
-     *
-     * @param teamId the ID of the team to delete
+     * Deletes a team and every roster entry that places a player on it.
      */
+    @Transactional
     public void deleteTeam(UUID teamId, UUID userId)
     {
         Team team = teams.findById( teamId ).orElseThrow();
-        requireAdmin( team.getLeague(), getUser(userId) );
+        access.requireAdmin( team.getLeague(), getUser(userId) );
+        rosterEntries.deleteAll( rosterEntries.findByTeam( team ) );
         teams.delete( team );
     }
 }

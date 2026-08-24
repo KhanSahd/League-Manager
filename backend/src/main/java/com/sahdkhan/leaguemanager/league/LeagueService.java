@@ -1,10 +1,13 @@
 package com.sahdkhan.leaguemanager.league;
 
-import com.sahdkhan.leaguemanager.exceptions.ForbiddenException;
+import com.sahdkhan.leaguemanager.season.Season;
+import com.sahdkhan.leaguemanager.season.SeasonRepository;
 import com.sahdkhan.leaguemanager.sports.Sport;
 import com.sahdkhan.leaguemanager.sports.SportRepository;
 import com.sahdkhan.leaguemanager.team.Player;
 import com.sahdkhan.leaguemanager.team.PlayerRepository;
+import com.sahdkhan.leaguemanager.team.RosterEntry;
+import com.sahdkhan.leaguemanager.team.RosterEntryRepository;
 import com.sahdkhan.leaguemanager.team.Team;
 import com.sahdkhan.leaguemanager.team.TeamRepository;
 import com.sahdkhan.leaguemanager.user.User;
@@ -12,8 +15,8 @@ import com.sahdkhan.leaguemanager.user.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -22,8 +25,7 @@ import java.util.UUID;
 @Service
 public class LeagueService
 {
-    /** Roles that may create, update, or delete resources within a league. */
-    private static final Set<LeagueRole> ADMIN_ROLES = Set.of(LeagueRole.OWNER, LeagueRole.ADMIN);
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     private final LeagueRepository leagues;
     private final LeagueMemberRepository members;
@@ -31,21 +33,22 @@ public class LeagueService
     private final SportRepository sports;
     private final TeamRepository teams;
     private final PlayerRepository players;
+    private final SeasonRepository seasons;
+    private final RosterEntryRepository rosterEntries;
+    private final LeagueInviteRepository invites;
+    private final LeagueAccessService access;
 
-    /**
-     * Constructs a LeagueService with the given repositories.
-     *
-     * @param leagues the league repository
-     * @param members the league member repository
-     * @param users   the user repository
-     */
     public LeagueService(
             LeagueRepository leagues,
             LeagueMemberRepository members,
             UserRepository users,
             SportRepository sports,
             TeamRepository teams,
-            PlayerRepository players
+            PlayerRepository players,
+            SeasonRepository seasons,
+            RosterEntryRepository rosterEntries,
+            LeagueInviteRepository invites,
+            LeagueAccessService access
     )
     {
         this.leagues = leagues;
@@ -54,34 +57,10 @@ public class LeagueService
         this.sports = sports;
         this.teams = teams;
         this.players = players;
-    }
-
-    /**
-     * Ensures that the user is a member of the specified league.
-     * @param league the league
-     * @param user the user
-     * @return the league member
-     */
-    private LeagueMember requireMembership(League league, User user)
-    {
-        return members.findByLeagueAndUser(league, user)
-                .orElseThrow(() -> new ForbiddenException("Not a member of this league"));
-    }
-
-    /**
-     * Ensures that the user has admin privileges in the specified league.
-     * @param league the league
-     * @param user the user
-     * @return the caller's league membership
-     */
-    private LeagueMember requireAdmin(League league, User user)
-    {
-        LeagueMember m = requireMembership(league, user);
-        if (!ADMIN_ROLES.contains(m.getRole()))
-        {
-            throw new ForbiddenException("Insufficient privileges");
-        }
-        return m;
+        this.seasons = seasons;
+        this.rosterEntries = rosterEntries;
+        this.invites = invites;
+        this.access = access;
     }
 
     /**
@@ -94,24 +73,34 @@ public class LeagueService
     {
         League league = leagues.findById( leagueId ).orElseThrow();
         User user = users.findById( userId ).orElseThrow();
-        return requireMembership( league, user ).getRole();
+        return access.requireMembership( league, user ).getRole();
     }
 
     /**
-     * Creates a new league with the specified name and sport, and assigns the user as the owner.
+     * Creates a new league with the specified name and sport, assigns the user as
+     * the owner, and starts its first season.
      *
      * @param userId the ID of the user creating the league
      * @param name   the name of the league
      * @param sportId  the sport of the league
      * @return the created league
      */
+    @Transactional
     public League createLeague( UUID userId, String name, UUID sportId )
     {
         User owner = users.findById( userId ).orElseThrow();
         Sport sport = sports.findById( sportId ).orElseThrow();
-        League league = leagues.save( new League( name, sport ) );
+        League league = leagues.save( new League( name, sport, generateSlug( name ) ) );
         members.save( new LeagueMember( owner, league, LeagueRole.OWNER ) );
+        seasons.save( new Season( league, "Season 1", null, null, true ) );
         return league;
+    }
+
+    private String generateSlug( String name )
+    {
+        String base = name.toLowerCase().replaceAll( "[^a-z0-9]+", "-" ).replaceAll( "(^-|-$)", "" );
+        String suffix = Long.toHexString( RANDOM.nextLong() ).substring( 0, 8 );
+        return ( base.isBlank() ? "league" : base ) + "-" + suffix;
     }
 
     /**
@@ -126,7 +115,7 @@ public class LeagueService
     {
         User user = users.findById( userId ).orElseThrow();
         League league = leagues.findById( leagueId ).orElseThrow();
-        requireAdmin( league, user );
+        access.requireAdmin( league, user );
         if ( name != null && !name.isBlank() )
         {
             league.setName( name );
@@ -144,15 +133,17 @@ public class LeagueService
     {
         User user = users.findById( userId ).orElseThrow();
         League league = leagues.findById( leagueId ).orElseThrow();
-        requireAdmin( league, user );
+        access.requireAdmin( league, user );
 
         List<Team> leagueTeams = teams.findByLeague( league );
         for ( Team team : leagueTeams )
         {
-            List<Player> teamPlayers = players.findByTeam( team );
-            players.deleteAll( teamPlayers );
+            rosterEntries.deleteAll( rosterEntries.findByTeam( team ) );
         }
+        players.deleteAll( players.findByLeague( league ) );
         teams.deleteAll( leagueTeams );
+        seasons.deleteAll( seasons.findByLeagueOrderByStartsOnDesc( league ) );
+        invites.deleteAll( invites.findByLeague( league ) );
         members.deleteByLeague( league );
         leagues.delete( league );
         return league;
