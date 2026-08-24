@@ -1,6 +1,6 @@
 # League Manager — Development Roadmap
 
-_Last updated: 2026-08-23_
+_Last updated: 2026-08-24 — Phase 0 and Phase 1 complete._
 
 ## Where the project actually stands
 
@@ -61,9 +61,20 @@ Nothing new gets built on a foundation with open authorization holes and a red t
 
 ---
 
-## Phase 1 — Domain foundation (~2 weeks)
+## Phase 1 — Domain foundation (~2 weeks) ✅ done
 
-The migration that makes everything after it possible. Ship this before a single game row exists.
+The migration that makes everything after it possible. Shipped in three commits
+(`71987c6`, `0bc97f2`, `9228df5`): V3/V4 migrations, `LeagueAccessService`, season and
+invite-code endpoints, the roster-entry rework of team/player, and the matching mobile
+screens (season switcher, join-by-code, invite sharing). Verified end to end against a
+live Postgres instance; the automated Testcontainers suite covers the same ground for CI.
+
+Not carried over from the original sketch below: `team.season_id` — teams stayed
+league-scoped with `roster_entry` carrying the season, which was the noted fallback and
+turned out simpler in practice. `created_at`/`updated_at` landed on the new tables
+(season, player, roster_entry, league_invite) but weren't retrofitted onto the
+pre-existing ones (league, team, league_member, user, sport) — the migration adds the
+columns, but wiring them into the JPA entities is still open.
 
 ### `V2__seasons_and_rosters.sql`
 
@@ -232,8 +243,22 @@ scattered through controllers.
 
 ---
 
-## Next three commits
+## Commit log
 
-1. `fix(security): remove /auth/users, enforce membership on team reads, whitelist admin roles`
-2. `chore: re-enable tests, add CI workflow, fix 10 TS errors, drop firebase + resend from mobile`
-3. `feat(db): V2 migration — seasons, league-scoped players, roster entries, invites`
+Phase 0 (stabilize):
+
+1. `a587552` — fix(security): remove /auth/users, enforce membership on team reads, whitelist admin roles
+2. `e62bc8c` — test(backend): re-enable tests, add Testcontainers integration suite and CI
+3. `ee8d7e9` — chore(mobile): drop dead firebase/resend deps, fix nav typing, resurrect Roster
+4. `5098e63` — docs: add development roadmap
+
+Phase 1 (domain foundation):
+
+5. `71987c6` — feat(backend): seasons, league-scoped rosters, and invite codes
+6. `0bc97f2` — test(backend): cover seasons, rosters, and invite codes
+7. `9228df5` — feat(mobile): wire the app to seasons, rosters, and invite-code joining
+
+## Next up: Phase 2 — Games & scheduling
+
+The `game` table, round-robin schedule generator, and schedule/game-detail screens
+described above. Nothing in Phase 2 is blocked — the season model it needs is in place.
